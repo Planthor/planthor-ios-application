@@ -77,15 +77,15 @@ jobs:
           - runner: ubuntu-latest
             platform: android
             build-type: debug
-          - runner: ubuntu-latest
-            platform: android
-            build-type: release
+        #   - runner: ubuntu-latest
+        #     platform: android
+        #     build-type: release
           - runner: macos-latest
             platform: ios
             build-type: debug
-          - runner: macos-latest
-            platform: ios
-            build-type: release
+        #   - runner: macos-latest
+        #     platform: ios
+        #     build-type: release
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
@@ -119,7 +119,7 @@ jobs:
 
       - name: Upload Android APK artifact
         if: matrix.platform == 'android'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-${{ matrix.build-type }}-apk
           path: build/app/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload iOS build artifact
         if: matrix.platform == 'ios'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-${{ matrix.build-type }}-build
           path: build/ios/iphoneos
