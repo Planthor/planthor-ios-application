@@ -1,0 +1,145 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  analyze:
+    name: Lint & Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run flutter analyze
+        run: flutter analyze
+
+  test:
+    name: Unit & Widget Tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run flutter test with coverage
+        run: flutter test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: flutter
+          name: flutter-coverage
+          fail_ci_if_error: false
+
+      - name: Check coverage threshold
+        run: |
+          # Extract coverage percentage from lcov.info
+          COVERAGE=$(grep -oP 'LF:\K[0-9]+' coverage/lcov.info | head -1)
+          COVERED=$(grep -oP 'LH:\K[0-9]+' coverage/lcov.info | head -1)
+          if [ "$COVERAGE" -gt 0 ]; then
+            PERCENT=$((COVERED * 100 / COVERAGE))
+            echo "Code coverage: $PERCENT%"
+            if [ "$PERCENT" -lt 70 ]; then
+              echo "Coverage below 70% threshold"
+              exit 1
+            fi
+          fi
+
+  build-android:
+    name: Build Android (${{ matrix.build-type }})
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      matrix:
+        build-type: [debug, release]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (${{ matrix.build-type }})
+        run: |
+          if [ "${{ matrix.build-type }}" = "debug" ]; then
+            flutter build apk --debug
+          else
+            flutter build apk --release
+          fi
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk-${{ matrix.build-type }}
+          path: build/app/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
+          retention-days: 7
+
+  build-ios:
+    name: Build iOS (${{ matrix.build-type }})
+    runs-on: macos-latest
+    needs: test
+    strategy:
+      matrix:
+        build-type: [debug, release]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS (${{ matrix.build-type }})
+        run: |
+          if [ "${{ matrix.build-type }}" = "debug" ]; then
+            flutter build ios --debug --no-codesign
+          else
+            flutter build ios --release --no-codesign
+          fi
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-build-${{ matrix.build-type }}
+          path: build/ios/iphoneos
+          retention-days: 7
+
+  ci-success:
+    name: CI Pipeline Success
+    runs-on: ubuntu-latest
+    needs: [analyze, test, build-android, build-ios]
+    if: success()
+    steps:
+      - name: CI Pipeline completed successfully
+        run: |
+            echo "✅ All checks passed: lint, test, Android build, iOS build"
