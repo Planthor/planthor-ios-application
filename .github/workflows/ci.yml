@@ -17,7 +17,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.41.7'
           channel: 'stable'
           cache: true
 
@@ -36,7 +36,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.41.7'
           channel: 'stable'
           cache: true
 
@@ -68,80 +68,75 @@ jobs:
             fi
           fi
 
-  build-android:
-    name: Build Android (${{ matrix.build-type }})
-    runs-on: ubuntu-latest
+  build:
+    name: Matrix Builds
     needs: test
     strategy:
       matrix:
-        build-type: [debug, release]
+        include:
+          - runner: ubuntu-latest
+            platform: android
+            build-type: debug
+          - runner: ubuntu-latest
+            platform: android
+            build-type: release
+          - runner: macos-latest
+            platform: ios
+            build-type: debug
+          - runner: macos-latest
+            platform: ios
+            build-type: release
       fail-fast: false
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.41.7'
           channel: 'stable'
           cache: true
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK (${{ matrix.build-type }})
+      - name: Build (matrix)
         run: |
-          if [ "${{ matrix.build-type }}" = "debug" ]; then
-            flutter build apk --debug
+          echo "Platform: ${{ matrix.platform }} - Build type: ${{ matrix.build-type }}"
+          if [ "${{ matrix.platform }}" = "android" ]; then
+            if [ "${{ matrix.build-type }}" = "debug" ]; then
+              flutter build apk --debug
+            else
+              flutter build apk --release
+            fi
           else
-            flutter build apk --release
+            if [ "${{ matrix.build-type }}" = "debug" ]; then
+              flutter build ios --debug --no-codesign
+            else
+              flutter build ios --release --no-codesign
+            fi
           fi
 
       - name: Upload Android APK artifact
+        if: matrix.platform == 'android'
         uses: actions/upload-artifact@v3
         with:
-          name: android-apk-${{ matrix.build-type }}
+          name: android-${{ matrix.build-type }}-apk
           path: build/app/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
           retention-days: 7
 
-  build-ios:
-    name: Build iOS (${{ matrix.build-type }})
-    runs-on: macos-latest
-    needs: test
-    strategy:
-      matrix:
-        build-type: [debug, release]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build iOS (${{ matrix.build-type }})
-        run: |
-          if [ "${{ matrix.build-type }}" = "debug" ]; then
-            flutter build ios --debug --no-codesign
-          else
-            flutter build ios --release --no-codesign
-          fi
-
       - name: Upload iOS build artifact
+        if: matrix.platform == 'ios'
         uses: actions/upload-artifact@v3
         with:
-          name: ios-build-${{ matrix.build-type }}
+          name: ios-${{ matrix.build-type }}-build
           path: build/ios/iphoneos
           retention-days: 7
 
   ci-success:
     name: CI Pipeline Success
     runs-on: ubuntu-latest
-    needs: [analyze, test, build-android, build-ios]
+    needs: [analyze, test, build]
     if: success()
     steps:
       - name: CI Pipeline completed successfully
