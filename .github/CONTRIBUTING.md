@@ -233,11 +233,15 @@ See project maintainers for production release steps.
 ## Pull Request Checklist
 
 Before submitting a PR:
-- ✅ `flutter analyze` passes locally
-- ✅ `flutter test` passes and coverage ≥ 70%
-- ✅ `flutter format .` applied to all files
-- ✅ Commit messages are clear and descriptive
-- ✅ New features include tests
+## SonarCloud Setup (optional)
+
+To enable SonarCloud analysis in CI, add these repository secrets under: Repository → Settings → Secrets and variables → Actions
+
+- `SONAR_TOKEN` — SonarCloud token (Execute Analysis permission)
+- `SONAR_ORGANIZATION` — SonarCloud organization key
+- `SONAR_PROJECT_KEY` — SonarCloud project key
+
+Create a project at https://sonarcloud.io (choose your organization), then add the three secrets above. The CI workflow will run the `sonar` job after tests and upload the coverage report to SonarCloud.
 - ✅ PR description explains the change
 
 ## Questions?
