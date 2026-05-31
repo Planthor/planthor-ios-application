@@ -14,4 +14,10 @@ class AppColors {
   // Functional Colors
   static const Color error = Color(0xFFD32F2F);
   static const Color success = Color(0xFF388E3C);
+
+  // Auth / UI Colors
+  static const Color facebookBlue = Color(0xFF1877F2);
+  static const Color backgroundGrey = Color(0xFFE5E5E5);
+  static const Color subtitleBlue = Color(0xFF5A78A6);
+  static const Color textGrey = Color(0xFFA0A0A0);
 }
