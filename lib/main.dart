@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:planthor_ios_application/features/navigation/presentation/main_scaffold.dart';
+import 'package:planthor_ios_application/features/auth/presentation/sign_in_screen.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Planthor',
       theme: theme,
-      home: const MainScaffold(),
+      home: const SignInScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
