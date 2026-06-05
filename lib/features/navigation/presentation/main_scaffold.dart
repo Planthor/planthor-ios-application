@@ -4,13 +4,33 @@ import 'package:planthor_ios_application/features/navigation/presentation/naviga
 import 'package:planthor_ios_application/features/plant_discovery/presentation/discovery_screen.dart';
 import 'package:planthor_ios_application/features/my_garden/presentation/garden_screen.dart';
 
-class MainScaffold extends ConsumerWidget {
-  const MainScaffold({super.key});
+class MainScaffold extends ConsumerStatefulWidget {
+  const MainScaffold({super.key, this.showWelcome = false});
+
+  final bool showWelcome;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = ref.watch(navigationProvider);
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
+}
 
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showWelcome) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful!')),
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedIndex = ref.watch(navigationProvider);
     final screens = [const DiscoveryScreen(), const GardenScreen()];
 
     return Scaffold(

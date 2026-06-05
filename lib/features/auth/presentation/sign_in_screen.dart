@@ -1,11 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
+import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/navigation/presentation/main_scaffold.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends ConsumerWidget {
   const SignInScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(authProvider, (previous, next) {
+      next.whenOrNull(
+        data: (token) {
+          if (token != null) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const MainScaffold(showWelcome: true),
+              ),
+            );
+          }
+        },
+        error: (error, _) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Sign in failed: $error')),
+          );
+        },
+      );
+    });
+
+    final isLoading = ref.watch(
+      authProvider.select((s) => s.isLoading),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.backgroundGrey,
       body: SafeArea(
@@ -14,7 +40,6 @@ class SignInScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Top "Sign-in" text to match the mockup exactly
                 const Padding(
                   padding: EdgeInsets.only(left: 32.0, bottom: 24.0),
                   child: Align(
@@ -43,7 +68,6 @@ class SignInScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Container for the white card
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 32.0),
                   padding: const EdgeInsets.only(
@@ -66,10 +90,8 @@ class SignInScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Logo Placeholder
                       _buildLogo(),
                       const SizedBox(height: 24),
-                      // Title
                       const Text(
                         'PLANTHOR',
                         style: TextStyle(
@@ -80,7 +102,6 @@ class SignInScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Subtitle
                       const Text(
                         'FROM PLAN TO PERFORMANCE',
                         style: TextStyle(
@@ -91,7 +112,6 @@ class SignInScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 48),
-                      // Sign in text
                       const Text(
                         'Sign in to Planthor',
                         style: TextStyle(
@@ -101,12 +121,15 @@ class SignInScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Facebook Button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: isLoading
+                              ? null
+                              : () => ref
+                                  .read(authProvider.notifier)
+                                  .signIn(),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.facebookBlue,
                             foregroundColor: Colors.white,
@@ -115,10 +138,19 @@ class SignInScreen extends StatelessWidget {
                             ),
                             elevation: 0,
                           ),
-                          icon: const Icon(Icons.facebook, size: 24),
-                          label: const Text(
-                            'Sign in with Facebook',
-                            style: TextStyle(
+                          icon: isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.facebook, size: 24),
+                          label: Text(
+                            isLoading ? 'Signing in…' : 'Sign in with Facebook',
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -129,7 +161,6 @@ class SignInScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Footer Links
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -154,7 +185,7 @@ class SignInScreen extends StatelessWidget {
       width: 48,
       height: 48,
       child: Transform.scale(
-        scale: 2, // Adjust this value to make the image visually larger or smaller
+        scale: 2,
         child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
       ),
     );
