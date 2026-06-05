@@ -14,9 +14,9 @@ dart run build_runner build --delete-conflicting-outputs
 # Analyze (must pass zero errors before PR)
 flutter analyze
 
-# Run app (copy dart_defines/*.example.json → dart_defines/<env>.json first)
-flutter run --dart-define-from-file=dart_defines/dev.json        # dev (Docker Compose)
-flutter run --dart-define-from-file=dart_defines/prod.json       # prod (cloud)
+# Run app
+flutter run --dart-define=ENV=dev        # dev (local Docker Compose)
+flutter run --dart-define=ENV=prod       # prod (cloud)
 
 # Run all tests
 flutter test

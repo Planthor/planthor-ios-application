@@ -54,34 +54,20 @@ authProvider state updates → main.dart routes to MainScaffold
 
 ## AppConfig Environment Variables
 
-Set via `--dart-define-from-file`:
+Pass a single define at run time — `AppConfig` derives all endpoints from it:
 
-```json
-// dart_defines/dev.json (copy from dev.example.json)
-{
-  "ENV": "dev",
-  "KEYCLOAK_BASE_URL": "http://localhost:8180",
-  "KEYCLOAK_REALM": "planthor",
-  "API_BASE_URL": "http://localhost:5008",
-  "CLIENT_ID": "planthor-ios"
-}
+```bash
+flutter run --dart-define=ENV=dev    # → localhost Keycloak + API
+flutter run --dart-define=ENV=prod   # → auth.planthor.space + api.planthor.space
 ```
 
-```json
-// dart_defines/prod.json (copy from prod.example.json)
-{
-  "ENV": "prod",
-  "KEYCLOAK_BASE_URL": "https://auth.planthor.space",
-  "KEYCLOAK_REALM": "planthor",
-  "API_BASE_URL": "https://api.planthor.space",
-  "CLIENT_ID": "planthor-ios"
-}
-```
+| Key | dev | prod |
+|-----|-----|------|
+| Keycloak base | `http://localhost:8180/realms/planthor` | `https://auth.planthor.space/realms/planthor` |
+| API base | `http://localhost:5008` | `https://api.planthor.space` |
+| Insecure HTTP | allowed | blocked |
 
-`AppConfig` reads these at startup:
-- `AppConfig.keycloakBaseUrl` → authorization + token endpoints
-- `AppConfig.apiBaseUrl` → API calls (Phase 2+)
-- `AppConfig.allowInsecureConnections` → true only when ENV=dev (localhost)
+All values live in `lib/core/config/app_config.dart`. No JSON config files needed.
 
 ## Platform Redirect URI Registration
 

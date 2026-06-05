@@ -17,38 +17,9 @@ flutter pub get
 cd ios && pod install && cd ..
 ```
 
-## 2. Configure Environment Files
+## 2. Environment Configuration
 
-Copy the example files and fill in values:
-
-```bash
-cp dart_defines/dev.example.json dart_defines/dev.json
-cp dart_defines/prod.example.json dart_defines/prod.json
-```
-
-`dart_defines/dev.json` — for local development with Docker Compose:
-```json
-{
-  "ENV": "dev",
-  "KEYCLOAK_BASE_URL": "http://localhost:8180",
-  "KEYCLOAK_REALM": "planthor",
-  "API_BASE_URL": "http://localhost:5008",
-  "CLIENT_ID": "planthor-ios"
-}
-```
-
-`dart_defines/prod.json` — for production:
-```json
-{
-  "ENV": "prod",
-  "KEYCLOAK_BASE_URL": "https://auth.planthor.space",
-  "KEYCLOAK_REALM": "planthor",
-  "API_BASE_URL": "https://api.planthor.space",
-  "CLIENT_ID": "planthor-ios"
-}
-```
-
-`dart_defines/*.json` files are gitignored. Never commit real credentials.
+All config is baked into `AppConfig` (`lib/core/config/app_config.dart`) and switches on a single `ENV` define. No JSON files needed.
 
 ## 3. Start Local Keycloak (dev only)
 
@@ -71,11 +42,11 @@ dart run build_runner build --delete-conflicting-outputs
 ## 5. Run the App
 
 ```bash
-# Development (local Keycloak + API)
-flutter run --dart-define-from-file=dart_defines/dev.json
+# Development (local Keycloak + API via Docker Compose)
+flutter run --dart-define=ENV=dev
 
 # Production
-flutter run --dart-define-from-file=dart_defines/prod.json
+flutter run --dart-define=ENV=prod
 ```
 
 ## 6. Run Tests and Analysis
