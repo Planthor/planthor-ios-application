@@ -51,6 +51,15 @@ authProvider state updates → main.dart routes to MainScaffold
 - **App startup:** `build()` in `Auth` notifier calls `getStoredToken()` — auto-login if valid
 - **Expiry:** `AuthToken.isExpired` checks `expiresAt`; datasource clears expired tokens on read
 - **Logout:** `signOut()` clears secure storage, resets provider state to `null`
+- **Refresh:** not yet implemented — expired tokens send the user back to `SignInScreen`
+
+## Token Storage Keys (flutter_secure_storage)
+
+| Key | Value |
+|-----|-------|
+| `access_token` | Raw JWT string — sent as Bearer token to the backend API |
+| `refresh_token` | Raw refresh token (nullable) |
+| `token_expiry` | ISO 8601 datetime string |
 
 ## AppConfig Environment Variables
 
@@ -61,17 +70,19 @@ flutter run --dart-define=ENV=dev    # → localhost Keycloak + API
 flutter run --dart-define=ENV=prod   # → auth.planthor.space + api.planthor.space
 ```
 
-| Key | dev | prod |
-|-----|-----|------|
+| Setting | dev | prod |
+|---------|-----|------|
 | Keycloak base | `http://localhost:8180/realms/planthor` | `https://auth.planthor.space/realms/planthor` |
 | API base | `http://localhost:5008` | `https://api.planthor.space` |
 | Insecure HTTP | allowed | blocked |
+| Client ID | `planthor-ios` | `planthor-ios` |
+| Redirect URI | `planthor://callback` | `planthor://callback` |
 
 All values live in `lib/core/config/app_config.dart`. No JSON config files needed.
 
 ## Platform Redirect URI Registration
 
-The `planthor://callback` URI scheme is registered on both platforms so the OS routes the OAuth callback back to the app:
+The `planthor://callback` URI scheme is registered on both platforms so the OS routes the OAuth callback back to the app.
 
 **iOS** (`ios/Runner/Info.plist`):
 ```xml
@@ -85,11 +96,34 @@ The `planthor://callback` URI scheme is registered on both platforms so the OS r
 ```
 
 **Android** (`android/app/src/main/AndroidManifest.xml`):
-```xml
-<intent-filter>
-  <action android:name="android.intent.action.VIEW"/>
-  <category android:name="android.intent.category.DEFAULT"/>
-  <category android:name="android.intent.category.BROWSABLE"/>
-  <data android:scheme="planthor" android:host="callback"/>
-</intent-filter>
+
+The `appAuthRedirectScheme` manifest placeholder in `android/app/build.gradle.kts` registers the scheme automatically via the flutter_appauth plugin's manifest merge:
+
+```kotlin
+manifestPlaceholders["appAuthRedirectScheme"] = "planthor"
 ```
+
+## Android OAuth Configuration Decisions
+
+### `android:launchMode="singleTop"` (required)
+
+flutter_appauth requires this on `MainActivity`. When the browser redirects back to `planthor://callback`, Android delivers the intent to the **existing** Activity instance. Without `singleTop`, a new instance is created that has no AppAuth state, causing:
+
+```
+W/AppAuth: No stored state - unable to handle response
+```
+
+### `android:taskAffinity` removed
+
+The default Flutter template includes `android:taskAffinity=""`. This was removed because an empty task affinity caused the OAuth redirect to arrive at a new task (no affinity to join an existing one), again losing AppAuth's pending request state.
+
+### `id("kotlin-android")` removed from build.gradle.kts
+
+The Flutter Gradle Plugin applies Kotlin internally since Flutter 3.x. Keeping the manual plugin application produced:
+
+```
+WARNING: Your Android app project applies the Kotlin Gradle Plugin,
+which will cause build failures in future versions of Flutter.
+```
+
+The `kotlinOptions { jvmTarget = ... }` block remains valid because the Flutter plugin still applies Kotlin — it just manages it internally now.
