@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/my_garden/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/my_garden/presentation/garden_screen.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
 import 'package:planthor_ios_application/features/plant_discovery/presentation/discovery_screen.dart';
@@ -52,6 +53,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         }
       });
     }
+
+    // Eagerly watch to trigger MemberSessionFilter JIT provisioning on first load.
+    ref.watch(personalPlansProvider);
 
     final selectedIndex = ref.watch(navigationProvider);
     final screens = [
