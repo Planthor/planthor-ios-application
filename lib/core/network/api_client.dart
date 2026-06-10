@@ -7,6 +7,7 @@ final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBase));
 
   // Inject token at request time so late-resolving auth state is always current.
+  // On 401: attempt silent token refresh and retry the request once.
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -15,6 +16,25 @@ final apiClientProvider = Provider<Dio>((ref) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
+      },
+      onError: (error, handler) async {
+        final alreadyRetried = error.requestOptions.extra['_authRetried'] == true;
+        if (error.response?.statusCode == 401 && !alreadyRetried) {
+          final refreshed =
+              await ref.read(authProvider.notifier).refreshTokens();
+          if (refreshed != null) {
+            final opts = error.requestOptions;
+            opts.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
+            opts.extra['_authRetried'] = true;
+            try {
+              final response = await dio.fetch(opts);
+              return handler.resolve(response);
+            } catch (retryError) {
+              return handler.next(error);
+            }
+          }
+        }
+        handler.next(error);
       },
     ),
   );

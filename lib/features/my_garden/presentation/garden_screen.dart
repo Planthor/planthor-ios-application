@@ -1,75 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:planthor_ios_application/features/my_garden/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/core/theme/app_colors.dart';
 
-class GardenScreen extends ConsumerWidget {
-  const GardenScreen({super.key});
+class GardenScreen extends StatelessWidget {
+  const GardenScreen({super.key, this.claims});
+
+  final Map<String, dynamic>? claims;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final plansAsync = ref.watch(personalPlansProvider);
+  Widget build(BuildContext context) {
+    if (claims == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Garden')),
-      body: plansAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 16),
-                const Text(
-                  'Failed to load plans',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(personalPlansProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
+    final rows = <_ClaimRow>[
+      if (claims!['name'] != null)
+        _ClaimRow('Name', claims!['name'].toString()),
+      if (claims!['preferred_username'] != null)
+        _ClaimRow('Username', claims!['preferred_username'].toString()),
+      if (claims!['email'] != null)
+        _ClaimRow('Email', claims!['email'].toString()),
+      if (claims!['sub'] != null)
+        _ClaimRow('Subject (sub)', claims!['sub'].toString()),
+      if (claims!['given_name'] != null)
+        _ClaimRow('First Name', claims!['given_name'].toString()),
+      if (claims!['family_name'] != null)
+        _ClaimRow('Last Name', claims!['family_name'].toString()),
+      if (claims!['exp'] != null)
+        _ClaimRow(
+          'Token Expires',
+          DateTime.fromMillisecondsSinceEpoch(
+            (claims!['exp'] as int) * 1000,
+          ).toLocal().toString(),
+        ),
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: Text(
+            'Session Info',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.earthBrown,
             ),
           ),
         ),
-        data: (plans) => plans.isEmpty
-            ? const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        if (rows.isEmpty)
+          const Text(
+            'No claims decoded from token.',
+            style: TextStyle(color: AppColors.textGrey),
+          )
+        else
+          ...rows.map(
+            (r) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.local_florist_outlined, size: 48, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      'No plans yet — API connected!',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    SizedBox(
+                      width: 130,
+                      child: Text(
+                        r.label,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textGrey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        r.value,
+                        style: const TextStyle(
+                          color: AppColors.earthBrown,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: plans.length,
-                itemBuilder: (context, index) {
-                  final plan = plans[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const Icon(Icons.local_florist),
-                      title: Text(plan.name),
-                      subtitle: Text(plan.id),
-                    ),
-                  );
-                },
               ),
-      ),
+            ),
+          ),
+      ],
     );
   }
+}
+
+class _ClaimRow {
+  const _ClaimRow(this.label, this.value);
+  final String label;
+  final String value;
 }

@@ -12,7 +12,9 @@ class Auth extends _$Auth {
   @override
   Future<AuthToken?> build() async {
     _repository = AuthRepositoryImpl();
-    return _repository.getStoredToken();
+    final stored = await _repository.getStoredToken();
+    if (stored != null) return stored;
+    return _repository.refreshTokens();
   }
 
   Future<void> signIn() async {
@@ -24,5 +26,20 @@ class Auth extends _$Auth {
   Future<void> signOut() async {
     await _repository.signOut();
     state = const AsyncData(null);
+  }
+
+  Future<AuthToken?> refreshTokens() async {
+    try {
+      final token = await _repository.refreshTokens();
+      if (token != null) {
+        state = AsyncData(token);
+      } else {
+        await signOut();
+      }
+      return token;
+    } catch (_) {
+      await signOut();
+      return null;
+    }
   }
 }

@@ -16,4 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthToken?> getStoredToken() => _datasource.getStoredToken();
+
+  @override
+  Future<AuthToken?> refreshTokens() => _datasource.refreshTokens();
 }

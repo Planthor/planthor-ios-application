@@ -61,10 +61,49 @@ class KeycloakAuthDatasource {
     );
 
     if (token.isExpired) {
+      // Remove access token but keep refresh token for silent refresh.
+      await Future.wait([
+        _storage.delete(key: _accessTokenKey),
+        _storage.delete(key: _tokenExpiryKey),
+      ]);
+      return null;
+    }
+
+    return token;
+  }
+
+  Future<AuthToken?> refreshTokens() async {
+    final refreshToken = await _storage.read(key: _refreshTokenKey);
+    if (refreshToken == null) return null;
+
+    final result = await _appAuth.token(
+      TokenRequest(
+        AppConfig.clientId,
+        AppConfig.redirectUri,
+        refreshToken: refreshToken,
+        serviceConfiguration: AuthorizationServiceConfiguration(
+          authorizationEndpoint: AppConfig.authEndpoint,
+          tokenEndpoint: AppConfig.tokenEndpoint,
+          endSessionEndpoint: AppConfig.endSessionUrl,
+        ),
+        grantType: GrantType.refreshToken,
+        allowInsecureConnections: AppConfig.allowInsecureConnections,
+      ),
+    );
+
+    if (result.accessToken == null ||
+        result.accessTokenExpirationDateTime == null) {
       await clearTokens();
       return null;
     }
 
+    final token = AuthToken(
+      accessToken: result.accessToken!,
+      refreshToken: result.refreshToken ?? refreshToken,
+      expiresAt: result.accessTokenExpirationDateTime!,
+    );
+
+    await _persistToken(token);
     return token;
   }
 
