@@ -80,3 +80,6 @@ Full developer documentation lives in `docs/`:
 - Phase 1 complete: auth (sign-in screen), navigation scaffold, theme/design system
 - Phase 2 in progress: `my_garden` fetches personal plans from API; `plant_discovery` is a stub
 - Phase 3 planned: goal tracking, community, profile
+
+# Design Rules
+- Flutter responsive design system for Planthor covering compact (phone), medium (fold unfolded / small tablet), and expanded (tablet) breakpoints — following Material 3 adaptive layout guidelines.

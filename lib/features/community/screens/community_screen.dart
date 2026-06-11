@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 
-class DiscoveryScreen extends StatelessWidget {
-  const DiscoveryScreen({super.key});
+/// Placeholder screen for the Community tab.
+class CommunityScreen extends StatelessWidget {
+  const CommunityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,18 +20,18 @@ class DiscoveryScreen extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.planGreenLight,
+                  color: AppColors.planActiveLight,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(
-                  Icons.explore_outlined,
+                  Icons.people_outline,
                   size: 36,
-                  color: AppColors.planGreen,
+                  color: AppColors.planBlueDark,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'Discover Plants',
+                'Community',
                 style: GoogleFonts.montserrat(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -39,7 +40,7 @@ class DiscoveryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Explore and learn about different plants to grow your garden.',
+                'Connect with fellow plant enthusiasts and share your journey.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(
                   fontSize: 14,

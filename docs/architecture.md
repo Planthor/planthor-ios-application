@@ -8,6 +8,7 @@ Planthor uses **Feature-first Clean Architecture** with Riverpod state managemen
 lib/
 ├── core/                   # Shared across features
 │   ├── config/             # AppConfig (env-aware endpoints)
+│   ├── layout/             # Responsive layout — AdaptiveLayout, breakpoints, AppSpacing
 │   ├── network/            # Dio HTTP client with auth interceptor
 │   ├── theme/              # AppColors, AppTheme
 │   ├── services/           # Shared services (Phase 2+)
@@ -25,7 +26,7 @@ lib/
 │       ├── providers/      # Riverpod notifiers (@riverpod annotated)
 │       ├── bloc/           # FutureProvider declarations (no codegen)
 │       ├── screens/        # Full-page ConsumerWidgets
-│       └── widgets/        # Feature-scoped UI components
+│       └── widgets/        # Feature-scoped UI components (e.g. PlanCard, PlanProgressRing)
 │
 └── main.dart               # Entry point — ProviderScope + auth-aware routing
 ```
@@ -72,6 +73,8 @@ apiClientProvider      (Provider<Dio>)             — plain Provider, no codege
 personalPlansProvider  (FutureProvider<List<PersonalPlan>>) — plain FutureProvider
   └─ watches apiClientProvider
   └─ GET /v1/members/me/PersonalPlans
+  └─ NOTE: GardenScreen currently renders mock data; provider is watched eagerly
+           in MainScaffold to trigger JIT provisioning but not yet wired to UI
 ```
 
 Generated files (`*.g.dart`) are produced by `build_runner`. Never edit them manually.
@@ -96,8 +99,24 @@ After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navig
 |---------|--------|-------|
 | `auth` | Complete | Keycloak OAuth, token storage, session restore |
 | `navigation` | Complete | Two-tab bottom nav with Riverpod state |
-| `my_garden` | Partial | Fetches personal plans from API; create/edit/delete not yet built |
+| `my_garden` | In Progress | Active Plans UI (Figma design implemented, mock data); API wiring + create/edit/delete not yet built |
 | `plant_discovery` | Stub | Placeholder screen only |
+
+## Responsive Layout System
+
+`lib/core/layout/` provides three utilities for Material 3 adaptive layouts:
+
+| File | Purpose |
+|------|---------|
+| `breakpoints.dart` | `WindowClass` enum (compact < 600, medium < 840, expanded ≥ 840). `BuildContext` extensions: `.windowClass`, `.isCompact`, `.isMedium`, `.isExpanded`, `.useSideNav` |
+| `app_spacing.dart` | Token constants (`AppSpacing.xs=4` … `xxl=48`) + context helpers: `.pageMargin()`, `.maxContentWidth()`, `.pagePadding()` |
+| `adaptive_layout.dart` | `AdaptiveLayout(compact:, medium:, expanded:)` widget — falls back to compact if medium/expanded not provided |
+
+## Design System / Fonts
+
+- **Montserrat** (Bold, SemiBold, Medium) via `google_fonts: ^6.2.1`
+- Use `GoogleFonts.montserrat(fontSize:, fontWeight:, ...)` in presentation widgets
+- `AppColors` plan palette: `planBlue (#1877F2)`, `planBlueDark (#0058BC)`, `planGreen (#16A34A)`, `planTextDark (#191C1E)`, `planTextSub (#414754)`, `planChip (#ECEEF0)`
 
 ## Adding a New Feature
 
