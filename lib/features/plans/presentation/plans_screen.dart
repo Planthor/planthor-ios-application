@@ -76,9 +76,19 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
   Widget build(BuildContext context) {
     final isConnected = false; // TODO: wire to real connectivity provider
 
-    return ColoredBox(
-      color: AppColors.surfaceBackground,
-      child: CustomScrollView(
+    return Scaffold(
+      backgroundColor: AppColors.surfaceBackground,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: AppColors.planthorBlue,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        elevation: 8,
+        child: const Icon(Icons.add, size: 24),
+      ),
+      body: CustomScrollView(
         slivers: [
           // ── Header ──
           SliverToBoxAdapter(

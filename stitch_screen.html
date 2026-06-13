@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Active Plans - Planthor Performance System</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"inverse-primary": "#7bd1fa", "border-subtle": "#E5E7EB", "text-muted": "#6B7280", "on-surface": "#252f43", "surface-container-low": "#edf0ff", "secondary-fixed": "#b1ddf7", tertiary: "#6f4b94", "surface-container-high": "#d8e2ff", "on-tertiary": "#fbefff", "secondary-container": "#b1ddf7", "surface-container": "#e0e8ff", "surface-card": "#FFFFFF", "inverse-on-surface": "#939db6", surface: "#f5f6ff", "on-primary-fixed-variant": "#004f69", "on-primary-fixed": "#003041", outline: "#6d778e", "primary-fixed-dim": "#6cc3eb", "on-background": "#252f43", secondary: "#346176", "on-secondary-fixed-variant": "#2c596f", "error-container": "#fb5151", "text-main": "#111827", "on-error-container": "#570008", primary: "#006382", "on-secondary": "#e6f5ff", error: "#b31b25", "on-tertiary-fixed": "#361059", "outline-variant": "#a3adc7", "tertiary-container": "#d6adff", background: "#f5f6ff", "on-primary": "#e5f5ff", "secondary-fixed-dim": "#a3cfe8", "on-primary-container": "#00465d", "surface-tint": "#006382", "surface-bright": "#f5f6ff", "on-surface-variant": "#525b72", "on-tertiary-container": "#4c2970", "primary-container": "#7bd1fa", "on-secondary-container": "#215065", "inverse-surface": "#040e21", "surface-container-lowest": "#ffffff", "tertiary-fixed": "#d6adff", "tertiary-fixed-dim": "#c8a0f0", "surface-variant": "#cfddff", "on-error": "#ffefee", "surface-container-highest": "#cfddff", "on-secondary-fixed": "#063d51", "achievement-green": "#34D399", "primary-fixed": "#7bd1fa", "surface-dim": "#c4d4fb", "on-tertiary-fixed-variant": "#55327a", "planthor-blue": "#18A0FB", "primary-dim": "#005672", "error-dim": "#9f0519", "tertiary-dim": "#623f87", "secondary-dim": "#27556a"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"stack-gap-sm": "8px", "card-padding": "24px", "stack-gap-md": "16px", "stack-gap-lg": "24px", "container-margin": "20px"}, fontFamily: {"label-sm": ["Inter"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "display-metric": ["Inter"], "body-md": ["Inter"], "metric-label": ["Inter"], "headline-md": ["Plus Jakarta Sans"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Inter"]}, fontSize: {"label-sm": ["12px", {lineHeight: "16px", fontWeight: "500"}], "headline-lg-mobile": ["24px", {lineHeight: "32px", fontWeight: "700"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "headline-lg": ["32px", {lineHeight: "40px", fontWeight: "700"}], "display-metric": ["48px", {lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "metric-label": ["14px", {lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-md": ["20px", {lineHeight: "28px", fontWeight: "600"}]}}}};</script>
+<style>
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #e6e6e6;
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 3.8;
+            stroke-linecap: round;
+        }
+        .percentage {
+            fill: #666;
+            font-family: sans-serif;
+            font-size: 0.5em;
+            text-anchor: middle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-[80px]">
+<!-- Top App Bar -->
+<header class="bg-surface sticky top-0 z-40 w-full px-container-margin py-stack-gap-sm flex items-center h-16 justify-between"><div class="flex items-center gap-2">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-planthor-blue font-jakarta">Planthor</h1>
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="Notifications" class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-lg transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div></header>
+<main class="px-container-margin py-stack-gap-lg max-w-3xl mx-auto space-y-6">
+<!-- Header Section -->
+<div class="flex justify-between items-center mb-2">
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-primary font-jakarta">Active Plans</h2>
+<div class="flex items-center gap-1 px-2 py-1 rounded-full bg-error-container text-on-error-container text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">link_off</span>
+<span class="uppercase tracking-wider text-[10px] font-bold">Not connected</span>
+</div>
+</div>
+<!-- Plan List -->
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-card border border-border-subtle shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 justify-between transition-shadow hover:shadow-[0_8px_30px_0_rgba(0,0,0,0.08)] p-3 rounded-lg"><div class="flex flex-col flex-grow p-3 gap-4"><div class="flex justify-between items-start"><div><h3 class="text-headline-md font-headline-md text-text-main">Run 100km in 2026</h3><p class="text-label-sm font-label-sm text-text-muted mt-1">Jan 1, 2026 - Dec 31, 2026</p></div><button class="bg-surface-container-low text-text-main hover:bg-surface-container-high p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">more_horiz</span></button></div><div class="flex items-center justify-between mb-8"><div><div class="text-display-metric font-display-metric flex items-baseline gap-2 text-error"><span class="">40</span><span class="text-headline-md font-headline-md text-text-muted">/ 100 km</span></div></div><div class="relative w-20 h-20"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><path class="text-error-container/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path><path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="40, 100" stroke-linecap="round" stroke-width="3"></path></svg><div class="absolute inset-0 flex items-center justify-center"><span class="material-symbols-outlined text-error text-2xl" data-weight="fill">directions_run</span></div></div></div><div class="flex items-center gap-2"><span class="text-metric-label font-metric-label text-error uppercase font-bold">Missed Deadline</span></div></div></div>
+<!-- Card 2 -->
+<div class="bg-surface-card border border-border-subtle shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 justify-between transition-shadow hover:shadow-[0_8px_30px_0_rgba(0,0,0,0.08)] p-3 rounded-lg"><div class="flex flex-col flex-grow p-3 gap-4"><div class="flex justify-between items-start"><div><h3 class="text-headline-md font-headline-md text-text-main">Century Challenge</h3><p class="text-label-sm font-label-sm text-text-muted mt-1">Feb 15, 2026 - May 20, 2026</p></div><button class="bg-surface-container-low text-text-main hover:bg-surface-container-high p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">more_horiz</span></button></div><div class="flex items-center justify-between mb-8"><div><div class="text-display-metric font-display-metric flex items-baseline gap-2"><span class="">120</span><span class="text-headline-md font-headline-md text-text-muted">/ 161 km</span></div></div><div class="relative w-20 h-20"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><path class="text-primary/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path><path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-linecap="round" stroke-width="3"></path></svg><div class="absolute inset-0 flex items-center justify-center"><span class="material-symbols-outlined text-primary text-2xl" data-weight="fill">pedal_bike</span></div></div></div><div class="flex items-center gap-2"><span class="text-metric-label font-metric-label text-primary">75% ACHIEVED</span></div></div></div>
+<!-- Card 3 -->
+<div class="bg-surface-card border border-border-subtle shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 justify-between transition-shadow hover:shadow-[0_8px_30px_0_rgba(0,0,0,0.08)] p-3 rounded-lg"><div class="flex flex-col flex-grow p-3 gap-4"><div class="flex justify-between items-start"><div><h3 class="text-headline-md font-headline-md text-text-main">Summer Swim Goal</h3><p class="text-label-sm font-label-sm text-text-muted mt-1">Jun 1, 2026 - Aug 31, 2026</p></div><button class="bg-surface-container-low text-text-main hover:bg-surface-container-high p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">more_horiz</span></button></div><div class="flex items-center justify-between mb-8"><div><div class="text-display-metric font-display-metric flex items-baseline gap-2"><span class="">50</span><span class="text-headline-md font-headline-md text-text-muted">/ 50 km</span></div></div><div class="relative w-20 h-20"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><path class="text-achievement-green/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path><path class="text-achievement-green" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path></svg><div class="absolute inset-0 flex items-center justify-center"><span class="material-symbols-outlined text-achievement-green text-2xl" data-weight="fill">pool</span></div></div></div><div class="flex items-center gap-2"><span class="text-metric-label font-metric-label text-achievement-green">100% ACHIEVED</span></div></div></div>
+<!-- Card 4 -->
+<div class="bg-surface-card border border-border-subtle shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 justify-between transition-shadow hover:shadow-[0_8px_30px_0_rgba(0,0,0,0.08)] p-3 rounded-lg"><div class="flex flex-col flex-grow p-3 gap-4"><div class="flex justify-between items-start"><div><h3 class="text-headline-md font-headline-md text-text-main">Morning Walk Streak</h3><p class="text-label-sm font-label-sm text-text-muted mt-1">Sep 1, 2026 - Sep 14, 2026</p></div><button class="bg-surface-container-low text-text-main hover:bg-surface-container-high p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">more_horiz</span></button></div><div class="flex items-center justify-between mb-8"><div><div class="text-display-metric font-display-metric flex items-baseline gap-2"><span class="">12</span><span class="text-headline-md font-headline-md text-text-muted">/ 10 walks</span></div></div><div class="relative w-20 h-20"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><path class="text-achievement-green/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path><path class="text-achievement-green" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path></svg><div class="absolute inset-0 flex items-center justify-center"><span class="material-symbols-outlined text-achievement-green text-2xl" data-weight="fill">directions_walk</span></div></div></div><div class="flex items-center gap-2"><span class="text-metric-label font-metric-label text-achievement-green">120% ACHIEVED</span></div></div></div>
+</div>
+<!-- View All Link -->
+<div class="flex justify-center mt-6 mb-8">
+<a class="text-planthor-blue text-metric-label font-metric-label uppercase font-bold tracking-wider flex items-center gap-1 hover:text-primary transition-colors" href="#">
+                View All Plans
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</main>
+<!-- FAB -->
+<button aria-label="Add new plan" class="fixed bottom-24 right-container-margin md:right-8 bg-planthor-blue text-white w-14 h-14 shadow-lg flex items-center justify-center hover:bg-primary transition-colors z-30 rounded-lg">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-card dark:bg-inverse-surface shadow-md dark:shadow-none rounded-t-xl md:hidden"><a class="flex flex-col items-center justify-center text-text-muted dark:text-surface-variant px-4 py-1.5 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-lg px-6 py-1.5 transition-all scale-95 duration-150 pointer-events-none" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_note</span>
+<span class="text-label-sm font-label-sm font-bold mt-1">Plans</span>
+</a>
+<a class="flex flex-col items-center justify-center text-text-muted dark:text-surface-variant px-4 py-1.5 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-sm font-label-sm mt-1">Settings</span>
+</a></nav>
+<!-- Desktop Side Nav (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col w-64 fixed left-0 top-16 bottom-0 bg-surface-card border-r border-border-subtle p-6 z-30">
+<nav class="space-y-2 flex-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-md">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-semibold transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">event_note</span>
+<span class="font-body-md">Plans</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-surface-container-low transition-colors" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Settings</span></a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-md">Profile</span>
+</a>
+</nav>
+</aside>
+<!-- Adjust main content margin for desktop sidebar -->
+<style>
+        @media (min-width: 768px) {
+            main {
+                margin-left: 16rem; /* 64 * 0.25rem */
+                max-width: calc(100% - 16rem - 2rem);
+            }
+        }
+    </style>
+
+
+
+
+
+
+</body></html>

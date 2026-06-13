@@ -21,8 +21,14 @@ class MainScaffold extends ConsumerStatefulWidget {
   ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends ConsumerState<MainScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold>
+    with SingleTickerProviderStateMixin {
   bool _welcomeShown = false;
+  int _displayIndex = 0;
+  int _animatingIndex = 0;
+  int _direction = 1;
+  late final AnimationController _slideController;
+  late Animation<Offset> _enterAnimation;
 
   static const _screens = [
     DiscoveryScreen(),
@@ -30,6 +36,48 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     CommunityScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _enterAnimation = _buildEnterAnimation();
+    _slideController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _displayIndex = _animatingIndex;
+          _slideController.reset();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  Animation<Offset> _buildEnterAnimation() {
+    return Tween<Offset>(
+      begin: Offset(_direction.toDouble(), 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+  }
+
+  void _onTabTap(int newIndex) {
+    if (newIndex == _displayIndex) return;
+    setState(() {
+      _direction = newIndex > _displayIndex ? 1 : -1;
+      _animatingIndex = newIndex;
+      _enterAnimation = _buildEnterAnimation();
+    });
+    _slideController.forward(from: 0);
+    ref.read(navigationProvider.notifier).setIndex(newIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,15 +118,24 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     final selectedIndex = ref.watch(navigationProvider);
 
+    final bool isAnimating = _slideController.isAnimating ||
+        (_slideController.value > 0 && _animatingIndex != _displayIndex);
+
     return Scaffold(
       appBar: const PlanthorAppBar(),
-      body: IndexedStack(
-        index: selectedIndex,
-        children: _screens,
+      body: Stack(
+        children: [
+          _screens[_displayIndex],
+          if (isAnimating)
+            SlideTransition(
+              position: _enterAnimation,
+              child: _screens[_animatingIndex],
+            ),
+        ],
       ),
       bottomNavigationBar: PlanthorBottomNav(
         currentIndex: selectedIndex,
-        onTap: (index) => ref.read(navigationProvider.notifier).setIndex(index),
+        onTap: _onTabTap,
       ),
     );
   }

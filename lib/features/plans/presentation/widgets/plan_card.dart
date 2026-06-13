@@ -4,16 +4,15 @@ import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_progress_ring.dart';
 
-/// Plan card matching the Stitch "Active Plans - Dashboard" design.
+/// Plan card — compact layout.
 ///
-/// Layout:
-///  ┌─────────────────────────────────────┐
-///  │ Title             [Details] [Ring]  │
-///  │ Jan 1 – Dec 31                      │
-///  │                                     │
-///  │  56    / 100 km                     │
-///  │  40% ACHIEVED  (or MISSED DEADLINE) │
-///  └─────────────────────────────────────┘
+///  ┌──────────────────────────────────┐
+///  │ Title                  [Details] │
+///  │ Jan 1 – Dec 31                   │
+///  │                                  │
+///  │  56 / 100 km          [Ring 56%] │
+///  │  40% ACHIEVED                    │
+///  └──────────────────────────────────┘
 class PlanCard extends StatelessWidget {
   const PlanCard({super.key, required this.plan, this.onTap});
 
@@ -47,15 +46,14 @@ class PlanCard extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Top row: title + date + details button + ring ──
+              // ── Top row: title + date + Details button ──
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left: title + date
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +61,7 @@ class PlanCard extends StatelessWidget {
                         Text(
                           plan.name,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textMain,
                             height: 1.3,
@@ -71,11 +69,11 @@ class PlanCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           plan.dateRange,
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textMuted,
                           ),
@@ -83,80 +81,85 @@ class PlanCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  // Right: Details button + progress ring stacked
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _DetailsButton(onTap: onTap),
-                      const SizedBox(height: 10),
-                      PlanProgressRing(
-                        progress: plan.progress,
-                        icon: plan.icon,
-                        size: 80,
-                        isOverdue: _isOverdue,
-                      ),
-                    ],
-                  ),
+                  const SizedBox(width: 10),
+                  _DetailsButton(onTap: onTap),
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
-              // ── Metric row: large number + unit ──
+              // ── Bottom row: metric + status (left) | ring (right) ──
               Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    _fmt(plan.current),
-                    style: GoogleFonts.inter(
-                      fontSize: 52,
-                      fontWeight: FontWeight.w700,
-                      color: _isOverdue ? AppColors.planOverdue : AppColors.textMain,
-                      height: 1.0,
-                      letterSpacing: -1.0,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              _fmt(plan.current),
+                              style: GoogleFonts.inter(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                color: _isOverdue
+                                    ? AppColors.planOverdue
+                                    : AppColors.textMain,
+                                height: 1.0,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                '/ ${_fmt(plan.target)} ${plan.unit}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textMuted,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            if (_isComplete) ...[
+                              const SizedBox(width: 6),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Icon(
+                                  Icons.check_circle,
+                                  size: 18,
+                                  color: AppColors.achievementGreen,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        if (_isOverdue)
+                          _StatusLabel(
+                            text: 'MISSED DEADLINE',
+                            color: AppColors.planOverdue,
+                          )
+                        else
+                          _StatusLabel(
+                            text: '${plan.progressPercent}% ACHIEVED',
+                            color: _accentColor,
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      '/ ${_fmt(plan.target)} ${plan.unit}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textMuted,
-                        height: 1.2,
-                      ),
-                    ),
+                  const SizedBox(width: 12),
+                  PlanProgressRing(
+                    progress: plan.progress,
+                    icon: plan.icon,
+                    size: 64,
+                    isOverdue: _isOverdue,
                   ),
-                  if (_isComplete) ...[
-                    const SizedBox(width: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Icon(
-                        Icons.check_circle,
-                        size: 20,
-                        color: AppColors.achievementGreen,
-                      ),
-                    ),
-                  ],
                 ],
               ),
-
-              const SizedBox(height: 6),
-
-              // ── Achievement / status label ──
-              if (_isOverdue)
-                _StatusLabel(
-                  text: 'MISSED DEADLINE',
-                  color: AppColors.planOverdue,
-                )
-              else
-                _StatusLabel(
-                  text: '${plan.progressPercent}% ACHIEVED',
-                  color: _accentColor,
-                ),
             ],
           ),
         ),
