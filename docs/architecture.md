@@ -112,6 +112,16 @@ After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navig
 | `my_garden` | In Progress | Active Plans fetch from API; create/edit/delete not yet built |
 | `plant_discovery` | Stub | Placeholder screen only |
 
+### Mock / Demo Data
+
+The following screens display placeholder values until real API endpoints are wired (next stage):
+
+| Location | Data | Placeholder shown |
+|----------|------|-------------------|
+| `profile_screen.dart` → `_StatsGrid` | Avg completion, total workouts, current streak | `'—'` |
+| `profile_screen.dart` → `_ProfileHeader` | Member join date | Removed (no API field yet) |
+| `plans/presentation/plans_screen.dart` | Plan list | 5 hardcoded `PersonalPlan` objects |
+
 ## Responsive Layout System
 
 `lib/core/layout/` provides three utilities for Material 3 adaptive layouts:

@@ -46,7 +46,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
     );
     _enterAnimation = _buildEnterAnimation();
     _slideController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
+      if (status == AnimationStatus.completed && mounted) {
         setState(() {
           _displayIndex = _animatingIndex;
           _slideController.reset();
@@ -119,7 +119,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
     final selectedIndex = ref.watch(navigationProvider);
 
     final bool isAnimating = _slideController.isAnimating ||
-        (_slideController.value > 0 && _animatingIndex != _displayIndex);
+        _animatingIndex != _displayIndex;
 
     return Scaffold(
       appBar: const PlanthorAppBar(),

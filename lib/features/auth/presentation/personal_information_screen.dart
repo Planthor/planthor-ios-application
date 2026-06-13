@@ -26,7 +26,10 @@ class _PersonalInformationScreenState
     super.initState();
     final authState = ref.read(authProvider);
     final token = authState.value;
-    final userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
+    Map<String, dynamic>? userClaims;
+    try {
+      userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
+    } catch (_) {}
 
     String firstName = '';
     String lastName = '';

@@ -199,15 +199,6 @@ class _ProfileHeader extends ConsumerWidget {
             color: AppColors.textMain,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Member since May 2026',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textMuted,
-          ),
-        ),
       ],
     );
   }
@@ -227,7 +218,7 @@ class _StatsGrid extends StatelessWidget {
           child: _StatCard(
             icon: Icons.data_usage_outlined,
             label: 'AVG. COMPLETION',
-            value: '94%',
+            value: '—', // TODO: wire to API
             valueColor: AppColors.planthorBlue,
           ),
         ),
@@ -237,7 +228,7 @@ class _StatsGrid extends StatelessWidget {
           child: _StatCard(
             icon: Icons.fitness_center_outlined,
             label: 'TOTAL WORKOUTS',
-            value: '312',
+            value: '—', // TODO: wire to API
             valueColor: AppColors.textMain,
           ),
         ),
@@ -247,8 +238,7 @@ class _StatsGrid extends StatelessWidget {
           child: _StatCard(
             icon: Icons.local_fire_department_outlined,
             label: 'CURRENT STREAK',
-            value: '18',
-            valueSuffix: 'days',
+            value: '—', // TODO: wire to API
             iconColor: AppColors.achievementGreen,
           ),
         ),
@@ -262,7 +252,6 @@ class _StatCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
-    this.valueSuffix,
     this.valueColor = AppColors.textMain,
     this.iconColor = AppColors.textMuted,
   });
@@ -270,7 +259,6 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final String? valueSuffix;
   final Color valueColor;
   final Color iconColor;
 
@@ -323,20 +311,6 @@ class _StatCard extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              if (valueSuffix != null) ...[
-                const SizedBox(width: 2),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text(
-                    valueSuffix!,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ],
