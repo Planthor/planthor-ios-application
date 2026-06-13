@@ -6,7 +6,6 @@ import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
 import 'package:planthor_ios_application/core/widgets/planthor_bottom_nav.dart';
 import 'package:planthor_ios_application/features/auth/presentation/profile_screen.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
-import 'package:planthor_ios_application/features/community/screens/community_screen.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
@@ -33,7 +32,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   static const _screens = [
     DiscoveryScreen(),
     PlansScreen(),
-    CommunityScreen(),
     ProfileScreen(),
   ];
 

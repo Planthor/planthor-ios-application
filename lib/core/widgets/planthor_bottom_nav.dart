@@ -28,11 +28,6 @@ class PlanthorBottomNav extends StatelessWidget {
       label: 'Plans',
     ),
     _NavItemData(
-      icon: Icons.people_outline,
-      activeIcon: Icons.people,
-      label: 'Community',
-    ),
-    _NavItemData(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: 'Settings',
