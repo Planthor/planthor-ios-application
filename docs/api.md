@@ -51,6 +51,8 @@ The token is injected automatically by `apiClientProvider` (`lib/core/network/ap
 |----------|----------|------|
 | `personalPlansProvider` | `GET /v1/members/me/PersonalPlans` | `lib/features/my_garden/bloc/personal_plans_provider.dart` |
 
+> **Note:** `PlansScreen` (`lib/features/plans/`) currently renders 5 hardcoded demo `PersonalPlan` objects. No live API call is made from that screen yet — real integration pending.
+
 ### Adding a new call
 
 1. Add a `FutureProvider` in the relevant feature's `bloc/` folder:

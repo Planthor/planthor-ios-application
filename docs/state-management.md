@@ -67,6 +67,7 @@ final isLoading = ref.watch(authProvider.select((s) => s.isLoading));
 | `authProvider` | `lib/features/auth/presentation/providers/auth_provider.dart` | `AsyncValue<AuthToken?>` |
 | `navigationProvider` | `lib/features/navigation/presentation/navigation_provider.dart` | `int` (tab index) |
 | `appThemeProvider` | `lib/core/theme/app_theme.dart` | `ThemeData` |
+| `stravaConnectionProvider` | `lib/features/connect_apps/providers/strava_connection_provider.dart` | `StravaConnectionStatus` (enum: disconnected/connecting/connected) — OAuth stubbed |
 
 ---
 

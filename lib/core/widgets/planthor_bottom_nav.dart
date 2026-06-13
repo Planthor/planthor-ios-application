@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 
-/// A modern bottom navigation bar matching the Figma design.
+/// Bottom navigation bar matching the Stitch "Updated Nav" design.
 ///
-/// Features a floating card style with rounded corners, active indicator dot,
-/// and smooth icon/label transitions.
+/// Active tab renders as a pill/capsule with [AppColors.primaryContainer]
+/// background. Inactive tabs show muted icon + label.
 class PlanthorBottomNav extends StatelessWidget {
   const PlanthorBottomNav({
     super.key,
@@ -18,13 +18,13 @@ class PlanthorBottomNav extends StatelessWidget {
 
   static const _items = [
     _NavItemData(
-      icon: Icons.explore_outlined,
-      activeIcon: Icons.explore,
-      label: 'Discover',
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home,
+      label: 'Home',
     ),
     _NavItemData(
-      icon: Icons.flag_outlined,
-      activeIcon: Icons.flag,
+      icon: Icons.event_note_outlined,
+      activeIcon: Icons.event_note,
       label: 'Plans',
     ),
     _NavItemData(
@@ -33,9 +33,9 @@ class PlanthorBottomNav extends StatelessWidget {
       label: 'Community',
     ),
     _NavItemData(
-      icon: Icons.person_outline,
-      activeIcon: Icons.person,
-      label: 'Profile',
+      icon: Icons.settings_outlined,
+      activeIcon: Icons.settings,
+      label: 'Settings',
     ),
   ];
 
@@ -45,30 +45,33 @@ class PlanthorBottomNav extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceCard,
         border: Border(
           top: BorderSide(
-            color: Color(0xFFE8EAF0),
+            color: AppColors.borderSubtle,
             width: 1,
           ),
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: SizedBox(
         height: 64,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(_items.length, (index) {
             final item = _items[index];
             final isActive = index == currentIndex;
 
-            return Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onTap(index),
-                child: _NavItem(
-                  item: item,
-                  isActive: isActive,
-                ),
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onTap(index),
+              child: _NavItem(
+                item: item,
+                isActive: isActive,
               ),
             );
           }),
@@ -101,45 +104,60 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // ── Active indicator ──
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-          width: isActive ? 32 : 0,
-          height: 3,
-          margin: const EdgeInsets.only(bottom: 6),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.planBlue : Colors.transparent,
-            borderRadius: BorderRadius.circular(2),
-          ),
+    if (isActive) {
+      // Active: pill/capsule background
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primaryContainer,
+          borderRadius: BorderRadius.circular(99),
         ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              item.activeIcon,
+              size: 22,
+              color: AppColors.onPrimaryContainer,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              item.label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.onPrimaryContainer,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-        // ── Icon ──
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Icon(
-            isActive ? item.activeIcon : item.icon,
-            key: ValueKey(isActive),
-            size: 24,
-            color: isActive ? AppColors.planBlue : AppColors.textGrey,
+    // Inactive
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            item.icon,
+            size: 22,
+            color: AppColors.textMuted,
           ),
-        ),
-        const SizedBox(height: 4),
-
-        // ── Label ──
-        Text(
-          item.label,
-          style: GoogleFonts.montserrat(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            color: isActive ? AppColors.planBlue : AppColors.textGrey,
-            letterSpacing: 0.1,
+          const SizedBox(height: 2),
+          Text(
+            item.label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textMuted,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_card.dart';
-import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_filter_tabs.dart';
 
 class PlansScreen extends ConsumerStatefulWidget {
   const PlansScreen({super.key});
@@ -14,8 +13,6 @@ class PlansScreen extends ConsumerStatefulWidget {
 }
 
 class _PlansScreenState extends ConsumerState<PlansScreen> {
-  PlanFilter _selectedFilter = PlanFilter.all;
-
   // ── Demo data ──
   static const _plans = [
     PersonalPlan(
@@ -75,83 +72,33 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
     ),
   ];
 
-  List<PersonalPlan> get _filteredPlans {
-    return switch (_selectedFilter) {
-      PlanFilter.all => _plans,
-      PlanFilter.active =>
-        _plans.where((p) => p.status == PlanStatus.active).toList(),
-      PlanFilter.completed =>
-        _plans.where((p) => p.status == PlanStatus.completed).toList(),
-      PlanFilter.overdue =>
-        _plans.where((p) => p.status == PlanStatus.overdue).toList(),
-    };
-  }
-
-  Map<PlanFilter, int> get _filterCounts => {
-        PlanFilter.all: _plans.length,
-        PlanFilter.active:
-            _plans.where((p) => p.status == PlanStatus.active).length,
-        PlanFilter.completed:
-            _plans.where((p) => p.status == PlanStatus.completed).length,
-        PlanFilter.overdue:
-            _plans.where((p) => p.status == PlanStatus.overdue).length,
-      };
-
   @override
   Widget build(BuildContext context) {
-    final filtered = _filteredPlans;
+    final isConnected = false; // TODO: wire to real connectivity provider
 
     return ColoredBox(
-      color: const Color(0xFFF0F2F5),
+      color: AppColors.surfaceBackground,
       child: CustomScrollView(
         slivers: [
           // ── Header ──
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: _Header(
-                onSync: () {},
-              ),
-            ),
-          ),
-
-          // ── Summary stat row ──
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-              child: _SummaryRow(plans: _plans),
-            ),
-          ),
-
-          // ── Filter tabs ──
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
-              child: PlanFilterTabs(
-                selected: _selectedFilter,
-                counts: _filterCounts,
-                onChanged: (filter) =>
-                    setState(() => _selectedFilter = filter),
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              child: _Header(isConnected: isConnected),
             ),
           ),
 
           // ── Plan cards ──
-          if (filtered.isEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: _EmptyState(filter: _selectedFilter),
-              ),
-            )
+          if (_plans.isEmpty)
+            const SliverToBoxAdapter(child: _EmptyState())
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               sliver: SliverList.separated(
-                itemCount: filtered.length,
+                itemCount: _plans.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemBuilder: (_, index) => PlanCard(
-                  plan: filtered[index],
+                  plan: _plans[index],
                   onTap: () {},
                 ),
               ),
@@ -160,7 +107,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
           // ── View all link ──
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               child: _ViewAllLink(count: _plans.length),
             ),
           ),
@@ -175,41 +122,56 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onSync});
-  final VoidCallback onSync;
+  const _Header({required this.isConnected});
+  final bool isConnected;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Active Plans',
-              style: GoogleFonts.montserrat(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: AppColors.planBlue,
-                letterSpacing: -0.28,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Track your fitness journey',
-              style: GoogleFonts.montserrat(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppColors.planTextSub,
-              ),
-            ),
-          ],
+        Text(
+          'Active Plans',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: AppColors.planthorBlue,
+            letterSpacing: -0.3,
+          ),
         ),
-        Row(
-          children: [
-            _CircleButton(icon: Icons.sync, onTap: onSync),
-          ],
+        // Connection status chip
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: isConnected
+                ? AppColors.planGreenLight
+                : AppColors.planOverdueLight,
+            borderRadius: BorderRadius.circular(99),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isConnected ? Icons.link : Icons.link_off,
+                size: 13,
+                color: isConnected
+                    ? AppColors.achievementGreen
+                    : AppColors.planOverdue,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                isConnected ? 'CONNECTED' : 'NOT CONNECTED',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: isConnected
+                      ? AppColors.achievementGreen
+                      : AppColors.planOverdue,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -217,93 +179,63 @@ class _Header extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Summary stat row
+// Empty state
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.plans});
-  final List<PersonalPlan> plans;
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
-    final active = plans.where((p) => p.status == PlanStatus.active).length;
-    final completed =
-        plans.where((p) => p.status == PlanStatus.completed).length;
-    final overdue = plans.where((p) => p.status == PlanStatus.overdue).length;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _StatChip(
-            label: 'Active',
-            value: '$active',
-            color: AppColors.planBlueDark,
-            bgColor: AppColors.planActiveLight,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _StatChip(
-            label: 'Done',
-            value: '$completed',
-            color: AppColors.planGreen,
-            bgColor: AppColors.planGreenLight,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _StatChip(
-            label: 'Overdue',
-            value: '$overdue',
-            color: AppColors.planOverdue,
-            bgColor: AppColors.planOverdueLight,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.bgColor,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-  final Color bgColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            value,
-            style: GoogleFonts.montserrat(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: color,
+          // Circular icon container
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.surfaceContainer,
+              border: Border.all(
+                color: AppColors.surfaceBackground,
+                width: 4,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 40,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.event_busy_outlined,
+              size: 56,
+              color: AppColors.textMuted.withValues(alpha: 0.5),
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 28),
           Text(
-            label,
-            style: GoogleFonts.montserrat(
-              fontSize: 12,
+            'No Active Plans Yet',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: color.withValues(alpha: 0.75),
+              color: AppColors.textMain,
             ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "You don't have any active performance plans. Start your journey today!",
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textMuted,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -312,30 +244,8 @@ class _StatChip extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared small widgets
+// View all link
 // ─────────────────────────────────────────────────────────────────────────────
-
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          color: AppColors.planChip,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 16, color: AppColors.planTextSub),
-      ),
-    );
-  }
-}
 
 class _ViewAllLink extends StatelessWidget {
   const _ViewAllLink({required this.count});
@@ -346,90 +256,27 @@ class _ViewAllLink extends StatelessWidget {
     return Center(
       child: GestureDetector(
         onTap: () {},
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.planBlueDark.withValues(alpha: 0.2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'VIEW ALL PLANS',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.planthorBlue,
+                letterSpacing: 0.8,
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'VIEW ALL PLANS',
-                style: GoogleFonts.montserrat(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.planBlueDark,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.arrow_forward,
-                size: 14,
-                color: AppColors.planBlueDark,
-              ),
-            ],
-          ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.arrow_forward,
+              size: 14,
+              color: AppColors.planthorBlue,
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Empty state
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.filter});
-  final PlanFilter filter;
-
-  @override
-  Widget build(BuildContext context) {
-    final (icon, message) = switch (filter) {
-      PlanFilter.all => (Icons.list_alt, 'No plans yet. Create your first!'),
-      PlanFilter.active => (
-          Icons.play_circle_outline,
-          'No active plans right now.'
-        ),
-      PlanFilter.completed => (
-          Icons.check_circle_outline,
-          'No completed plans yet. Keep going!'
-        ),
-      PlanFilter.overdue => (
-          Icons.warning_amber_rounded,
-          'No overdue plans. Great job!'
-        ),
-    };
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.planChip,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(icon, size: 28, color: AppColors.planTextSub),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.montserrat(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppColors.planTextSub,
-          ),
-        ),
-      ],
     );
   }
 }

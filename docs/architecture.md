@@ -13,7 +13,7 @@ lib/
 │   ├── theme/              # AppColors, AppTheme
 │   ├── services/           # Shared services (Phase 2+)
 │   ├── utils/              # Shared utilities (Phase 2+)
-│   └── widgets/            # Shared UI components (Phase 2+)
+│   └── widgets/            # Shared UI components — PlanthorAppBar, PlanthorBottomNav
 │
 ├── features/<name>/        # One directory per feature
 │   ├── domain/
@@ -67,6 +67,10 @@ navigationProvider     (Notifier<int>)             — @riverpod class
 
 appThemeProvider       (Notifier<ThemeData>)       — @riverpod class
 
+stravaConnectionProvider (AutoDisposeNotifier<StravaConnectionStatus>) — @riverpod class
+  └─ states: disconnected → connecting → connected
+  └─ connect() / disconnect() — OAuth stubbed, TODO: real Strava OAuth
+
 apiClientProvider      (Provider<Dio>)             — plain Provider, no codegen
   └─ reads authProvider for token injection
 
@@ -86,9 +90,13 @@ main.dart (watches authProvider)
   ├─ AsyncLoading  → CircularProgressIndicator
   ├─ AsyncError    → SignInScreen
   ├─ null token    → SignInScreen
-  └─ token present → MainScaffold
-                        ├─ index 0 (default) → DiscoveryScreen
-                        └─ index 1           → GardenScreen
+  └─ token present → MainScaffold (PlanthorBottomNav — 4 tabs)
+                        ├─ index 0 → DiscoveryScreen (Home)
+                        ├─ index 1 → PlansScreen
+                        ├─ index 2 → CommunityScreen (stub)
+                        └─ index 3 → ProfileScreen
+                                        ├─ push → PersonalInformationScreen
+                                        └─ push → ConnectAppsScreen
 ```
 
 After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navigator.pushReplacement` to `MainScaffold(showWelcome: true)` which shows a "Login successful!" snackbar.
@@ -97,9 +105,11 @@ After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navig
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| `auth` | Complete | Keycloak OAuth, token storage, session restore |
-| `navigation` | Complete | Two-tab bottom nav with Riverpod state |
-| `my_garden` | In Progress | Active Plans UI (Figma design implemented, mock data); API wiring + create/edit/delete not yet built |
+| `auth` | Complete | Keycloak OAuth, token storage, session restore, ProfileScreen, PersonalInformationScreen |
+| `navigation` | Complete | Four-tab bottom nav (`PlanthorBottomNav`) with Riverpod state |
+| `plans` | In Progress | PlansScreen dashboard, PlanCard, PlanProgressRing — demo data only; API wiring pending |
+| `connect_apps` | In Progress | ConnectAppsScreen + `StravaConnectionProvider` — UI complete, OAuth stubbed |
+| `my_garden` | In Progress | Active Plans fetch from API; create/edit/delete not yet built |
 | `plant_discovery` | Stub | Placeholder screen only |
 
 ## Responsive Layout System
@@ -114,9 +124,11 @@ After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navig
 
 ## Design System / Fonts
 
-- **Montserrat** (Bold, SemiBold, Medium) via `google_fonts: ^6.2.1`
-- Use `GoogleFonts.montserrat(fontSize:, fontWeight:, ...)` in presentation widgets
+- **Plus Jakarta Sans** (headings) and **Inter** (body) via `google_fonts: ^6.2.1`
+- Montserrat still used in some legacy widgets; new screens use Plus Jakarta Sans + Inter
 - `AppColors` plan palette: `planBlue (#1877F2)`, `planBlueDark (#0058BC)`, `planGreen (#16A34A)`, `planTextDark (#191C1E)`, `planTextSub (#414754)`, `planChip (#ECEEF0)`
+- Plan status tokens: `planOverdue`, `planUpcoming`, `planActiveLight`, `planGreenLight`
+- Integration token: `stravaOrange (#FC4C02)`
 
 ## Adding a New Feature
 

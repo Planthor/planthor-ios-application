@@ -2,176 +2,163 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
-import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_progress_bar.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_progress_ring.dart';
-import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_status_badge.dart';
 
+/// Plan card matching the Stitch "Active Plans - Dashboard" design.
+///
+/// Layout:
+///  ┌─────────────────────────────────────┐
+///  │ Title             [Details] [Ring]  │
+///  │ Jan 1 – Dec 31                      │
+///  │                                     │
+///  │  56    / 100 km                     │
+///  │  40% ACHIEVED  (or MISSED DEADLINE) │
+///  └─────────────────────────────────────┘
 class PlanCard extends StatelessWidget {
   const PlanCard({super.key, required this.plan, this.onTap});
 
   final PersonalPlan plan;
   final VoidCallback? onTap;
 
+  bool get _isOverdue => plan.status == PlanStatus.overdue;
+  bool get _isComplete => plan.progress >= 1.0 && !_isOverdue;
+
+  Color get _accentColor {
+    if (_isOverdue) return AppColors.planOverdue;
+    if (_isComplete) return AppColors.achievementGreen;
+    return AppColors.planthorBlue;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final progressColor =
-        plan.isComplete ? AppColors.planGreen : AppColors.planBlueDark;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderSubtle, width: 1),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x0D191C1E),
-              blurRadius: 24,
-              offset: Offset(0, 8),
-              spreadRadius: -4,
-            ),
-            BoxShadow(
-              color: Color(0x05191C1E),
-              blurRadius: 8,
-              offset: Offset(0, 2),
+              color: Color(0x0A000000),
+              blurRadius: 20,
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Top row: title + date + details button + ring ──
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Status badge + icon row ──
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      PlanStatusBadge(status: plan.status),
-                      _ActionMenu(plan: plan),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // ── Title + progress ring ──
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              plan.name,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.planTextDark,
-                                height: 1.35,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 13,
-                                  color: AppColors.planTextSub,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  plan.dateRange,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.planTextSub,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                  // Left: title + date
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          plan.name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMain,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      PlanProgressRing(
-                          progress: plan.progress, icon: plan.icon),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          plan.dateRange,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 18),
-
-                  // ── Progress stats row ──
-                  Row(
+                  const SizedBox(width: 12),
+                  // Right: Details button + progress ring stacked
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: _fmt(plan.current),
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.planTextDark,
-                                      height: 1.1,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' / ${_fmt(plan.target)}',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.planTextSub,
-                                      height: 1.1,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' ${plan.unit}',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.planTextSub,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${plan.progressPercent}% ACHIEVED',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: progressColor,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      _DetailsButton(
-                        isComplete: plan.isComplete,
-                        onTap: onTap,
+                      _DetailsButton(onTap: onTap),
+                      const SizedBox(height: 10),
+                      PlanProgressRing(
+                        progress: plan.progress,
+                        icon: plan.icon,
+                        size: 80,
+                        isOverdue: _isOverdue,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
                 ],
               ),
-            ),
 
-            // ── Bottom progress bar (full width, flush with card bottom) ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: PlanProgressBar(progress: plan.progress),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // ── Metric row: large number + unit ──
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _fmt(plan.current),
+                    style: GoogleFonts.inter(
+                      fontSize: 52,
+                      fontWeight: FontWeight.w700,
+                      color: _isOverdue ? AppColors.planOverdue : AppColors.textMain,
+                      height: 1.0,
+                      letterSpacing: -1.0,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '/ ${_fmt(plan.target)} ${plan.unit}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textMuted,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                  if (_isComplete) ...[
+                    const SizedBox(width: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Icon(
+                        Icons.check_circle,
+                        size: 20,
+                        color: AppColors.achievementGreen,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+
+              const SizedBox(height: 6),
+
+              // ── Achievement / status label ──
+              if (_isOverdue)
+                _StatusLabel(
+                  text: 'MISSED DEADLINE',
+                  color: AppColors.planOverdue,
+                )
+              else
+                _StatusLabel(
+                  text: '${plan.progressPercent}% ACHIEVED',
+                  color: _accentColor,
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -181,31 +168,10 @@ class PlanCard extends StatelessWidget {
       v == v.truncateToDouble() ? v.toInt().toString() : v.toString();
 }
 
-class _ActionMenu extends StatelessWidget {
-  const _ActionMenu({required this.plan});
-  final PersonalPlan plan;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: const BoxDecoration(
-        color: AppColors.planChip,
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.more_horiz,
-        size: 16,
-        color: AppColors.planTextSub,
-      ),
-    );
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _DetailsButton extends StatelessWidget {
-  const _DetailsButton({required this.isComplete, this.onTap});
-  final bool isComplete;
+  const _DetailsButton({this.onTap});
   final VoidCallback? onTap;
 
   @override
@@ -213,32 +179,38 @@ class _DetailsButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isComplete ? AppColors.planGreenLight : AppColors.planActiveLight,
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Details',
-              style: GoogleFonts.montserrat(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color:
-                    isComplete ? AppColors.planGreen : AppColors.planBlueDark,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 11,
-              color:
-                  isComplete ? AppColors.planGreen : AppColors.planBlueDark,
-            ),
-          ],
+        child: Text(
+          'Details',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textMain,
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _StatusLabel extends StatelessWidget {
+  const _StatusLabel({required this.text, required this.color});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: color,
+        letterSpacing: 0.8,
       ),
     );
   }

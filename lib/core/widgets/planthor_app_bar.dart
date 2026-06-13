@@ -23,10 +23,10 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceCard,
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE8EAF0),
+            color: AppColors.borderSubtle,
             width: 1,
           ),
         ),
@@ -48,25 +48,25 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
                       height: 36,
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
-                        color: AppColors.planChip,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(99),
                       ),
                       child: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: AppColors.planTextDark,
-                        size: 16,
+                        Icons.arrow_back,
+                        color: AppColors.planthorBlue,
+                        size: 18,
                       ),
                     ),
                   ),
 
-                // ── Brand icon + name ──
+                // ── Brand name ──
                 Text(
                   'Planthor',
-                  style: GoogleFonts.montserrat(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.planBlue,
-                    letterSpacing: -0.5,
+                    color: AppColors.planthorBlue,
+                    letterSpacing: -0.3,
                   ),
                 ),
 
@@ -75,39 +75,47 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 // ── Notification bell ──
                 GestureDetector(
                   onTap: onNotification ?? () {},
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.planChip,
-                      borderRadius: BorderRadius.circular(12),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.textMuted,
+                      size: 24,
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        const Icon(
-                          Icons.notifications_outlined,
-                          color: AppColors.planTextSub,
-                          size: 22,
-                        ),
-                        // Notification dot
-                        Positioned(
-                          top: 9,
-                          right: 10,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: AppColors.planOverdue,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 1.5,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // ── User avatar ──
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.surfaceContainer,
+                      border: Border.all(
+                        color: AppColors.borderSubtle,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: avatarUrl != null
+                          ? Image.network(
+                              avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.person,
+                                size: 18,
+                                color: AppColors.textMuted,
                               ),
+                            )
+                          : const Icon(
+                              Icons.person,
+                              size: 18,
+                              color: AppColors.textMuted,
                             ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
