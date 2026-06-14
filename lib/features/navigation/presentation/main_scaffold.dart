@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
+import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
+import 'package:planthor_ios_application/core/widgets/planthor_bottom_nav.dart';
+import 'package:planthor_ios_application/features/auth/presentation/profile_screen.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
-import 'package:planthor_ios_application/features/my_garden/bloc/personal_plans_provider.dart';
-import 'package:planthor_ios_application/features/my_garden/presentation/garden_screen.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
+import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
 import 'package:planthor_ios_application/features/plant_discovery/presentation/discovery_screen.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -17,8 +20,62 @@ class MainScaffold extends ConsumerStatefulWidget {
   ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends ConsumerState<MainScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold>
+    with SingleTickerProviderStateMixin {
   bool _welcomeShown = false;
+  int _displayIndex = 0;
+  int _animatingIndex = 0;
+  int _direction = 1;
+  late final AnimationController _slideController;
+  late Animation<Offset> _enterAnimation;
+
+  static const _screens = [
+    DiscoveryScreen(),
+    PlansScreen(),
+    ProfileScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _enterAnimation = _buildEnterAnimation();
+    _slideController.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        setState(() {
+          _displayIndex = _animatingIndex;
+          _slideController.reset();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  Animation<Offset> _buildEnterAnimation() {
+    return Tween<Offset>(
+      begin: Offset(_direction.toDouble(), 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+  }
+
+  void _onTabTap(int newIndex) {
+    if (newIndex == _displayIndex) return;
+    setState(() {
+      _direction = newIndex > _displayIndex ? 1 : -1;
+      _animatingIndex = newIndex;
+      _enterAnimation = _buildEnterAnimation();
+    });
+    _slideController.forward(from: 0);
+    ref.read(navigationProvider.notifier).setIndex(newIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,39 +115,25 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     ref.watch(personalPlansProvider);
 
     final selectedIndex = ref.watch(navigationProvider);
-    final screens = [
-      const DiscoveryScreen(),
-      GardenScreen(claims: claims),
-    ];
-    final tabTitles = ['Discover', 'My Garden'];
+
+    final bool isAnimating = _slideController.isAnimating ||
+        _animatingIndex != _displayIndex;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(tabTitles[selectedIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign Out',
-            onPressed: () => ref.read(authProvider.notifier).signOut(),
-          ),
+      appBar: const PlanthorAppBar(),
+      body: Stack(
+        children: [
+          _screens[_displayIndex],
+          if (isAnimating)
+            SlideTransition(
+              position: _enterAnimation,
+              child: _screens[_animatingIndex],
+            ),
         ],
       ),
-      body: screens[selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: PlanthorBottomNav(
         currentIndex: selectedIndex,
-        onTap: (index) {
-          ref.read(navigationProvider.notifier).setIndex(index);
-        },
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.forestGreen,
-        unselectedItemColor: AppColors.textGrey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_florist),
-            label: 'My Garden',
-          ),
-        ],
+        onTap: _onTabTap,
       ),
     );
   }

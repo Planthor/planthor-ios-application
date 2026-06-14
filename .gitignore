@@ -48,3 +48,7 @@ app.*.map.json
 .env
 dart_defines/*.json
 !dart_defines/*.example.json
+
+# AI tooling — local only
+.gemini/
+.agents/

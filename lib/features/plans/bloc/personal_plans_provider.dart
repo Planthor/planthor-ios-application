@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/network/api_client.dart';
-import 'package:planthor_ios_application/features/my_garden/domain/entities/personal_plan.dart';
+import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 
 final personalPlansProvider = FutureProvider<List<PersonalPlan>>((ref) async {
   final dio = ref.watch(apiClientProvider);
