@@ -54,7 +54,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: Icons.person_outline,
                   title: 'Personal Information',
                   subtitle: 'Name, Email, Password',
-                  onTap: () => Navigator.of(context).push(
+                  onTap: () => Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const PersonalInformationScreen(),
                     ),
@@ -672,7 +672,7 @@ class _ConnectToAppsRow extends ConsumerWidget {
       icon: Icons.watch_outlined,
       title: 'Connect to apps',
       subtitle: subtitle,
-      onTap: () => Navigator.of(context).push(
+      onTap: () => Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute<void>(
           builder: (_) => const ConnectAppsScreen(),
         ),

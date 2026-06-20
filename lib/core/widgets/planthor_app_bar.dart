@@ -8,13 +8,11 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBack = false,
     this.onBack,
     this.onNotification,
-    this.avatarUrl,
   });
 
   final bool showBack;
   final VoidCallback? onBack;
   final VoidCallback? onNotification;
-  final String? avatarUrl;
 
   @override
   Size get preferredSize => const Size.fromHeight(64);
@@ -81,41 +79,6 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Icons.notifications_outlined,
                       color: AppColors.textMuted,
                       size: 24,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // ── User avatar ──
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.surfaceContainer,
-                      border: Border.all(
-                        color: AppColors.borderSubtle,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: ClipOval(
-                      child: avatarUrl != null
-                          ? Image.network(
-                              avatarUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.person,
-                                size: 18,
-                                color: AppColors.textMuted,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person,
-                              size: 18,
-                              color: AppColors.textMuted,
-                            ),
                     ),
                   ),
                 ),
