@@ -10,6 +10,8 @@ lib/
 │   ├── config/             # AppConfig (env-aware endpoints)
 │   ├── layout/             # Responsive layout — AdaptiveLayout, breakpoints, AppSpacing
 │   ├── network/            # Dio HTTP client with auth interceptor
+│   ├── router/             # GoRouter config — Auth Stack vs Main Stack, redirect guard
+│   ├── storage/            # LocalStore interface + SharedPreferences impl
 │   ├── theme/              # AppColors, AppTheme
 │   ├── services/           # Shared services (Phase 2+)
 │   ├── utils/              # Shared utilities (Phase 2+)
@@ -28,7 +30,7 @@ lib/
 │       ├── screens/        # Full-page ConsumerWidgets
 │       └── widgets/        # Feature-scoped UI components (e.g. PlanCard, PlanProgressRing)
 │
-└── main.dart               # Entry point — ProviderScope + auth-aware routing
+└── main.dart               # Entry point — ProviderScope + MaterialApp.router
 ```
 
 ## Data Flow
@@ -63,9 +65,17 @@ authProvider           (AsyncNotifier<AuthToken?>) — @riverpod class
        └─ KeycloakAuthDatasource
 
 navigationProvider     (Notifier<int>)             — @riverpod class
-  └─ tracks selected bottom nav index
+  └─ tracks selected bottom nav tab index (0=Home, 1=Plans, 2=Settings)
 
 appThemeProvider       (Notifier<ThemeData>)       — @riverpod class
+
+appRouterProvider      (Provider<GoRouter>)        — plain Provider, no codegen
+  └─ reads authProvider for redirect guard
+  └─ Auth Stack: /sign-in
+  └─ Main Stack (ShellRoute): /home, /plans, /settings
+
+localStoreProvider     (FutureProvider<LocalStore>) — plain FutureProvider
+  └─ SharedPreferences-backed key-value store for offline-capable data
 
 stravaConnectionProvider (AutoDisposeNotifier<StravaConnectionStatus>) — @riverpod class
   └─ states: disconnected → connecting → connected
@@ -77,36 +87,43 @@ apiClientProvider      (Provider<Dio>)             — plain Provider, no codege
 personalPlansProvider  (FutureProvider<List<PersonalPlan>>) — plain FutureProvider
   └─ watches apiClientProvider
   └─ GET /v1/members/me/PersonalPlans
-  └─ NOTE: GardenScreen currently renders mock data; provider is watched eagerly
-           in MainScaffold to trigger JIT provisioning but not yet wired to UI
+  └─ NOTE: provider is watched eagerly in MainScaffold to trigger JIT provisioning;
+           not yet wired to PlansScreen UI (renders demo data)
 ```
 
 Generated files (`*.g.dart`) are produced by `build_runner`. Never edit them manually.
 
 ## Navigation Flow
 
+Routing is handled by **GoRouter** (`lib/core/router/app_router.dart`). See `docs/navigation.md` for full details.
+
 ```
-main.dart (watches authProvider)
-  ├─ AsyncLoading  → CircularProgressIndicator
-  ├─ AsyncError    → SignInScreen
-  ├─ null token    → SignInScreen
-  └─ token present → MainScaffold (PlanthorBottomNav — 4 tabs)
-                        ├─ index 0 → DiscoveryScreen (Home)
-                        ├─ index 1 → PlansScreen
-                        ├─ index 2 → CommunityScreen (stub)
-                        └─ index 3 → ProfileScreen
-                                        ├─ push → PersonalInformationScreen
-                                        └─ push → ConnectAppsScreen
+main.dart
+  └─ MaterialApp.router (appRouterProvider)
+       │
+       ├─ /              → _SplashScreen (shown while authProvider is loading)
+       │
+       ├─ Auth Stack
+       │   └─ /sign-in  → SignInScreen
+       │
+       └─ Main Stack (ShellRoute → MainScaffold shell)
+           ├─ /home      → DiscoveryScreen  (tab 0)
+           ├─ /plans     → PlansScreen      (tab 1)
+           └─ /settings  → ProfileScreen    (tab 2)
+                               ├─ rootNavigator push → PersonalInformationScreen
+                               └─ rootNavigator push → ConnectAppsScreen
 ```
 
-After login via `SignInScreen`, a `ref.listen` on `authProvider` triggers `Navigator.pushReplacement` to `MainScaffold(showWelcome: true)` which shows a "Login successful!" snackbar.
+GoRouter redirect guard enforces auth: unauthenticated requests redirect to `/sign-in`; authenticated requests on `/sign-in` redirect to `/home`. After sign-in, `authProvider` state change triggers the redirect automatically — no manual `Navigator.push` needed.
+
+Sub-screens pushed from inside the shell use `Navigator.of(context, rootNavigator: true).push(...)` to cover the full screen above `MainScaffold`.
 
 ## Feature Status
 
 | Feature | Status | Notes |
 |---------|--------|-------|
 | `auth` | Complete | Keycloak OAuth, token storage, session restore, ProfileScreen, PersonalInformationScreen |
-| `navigation` | Complete | Four-tab bottom nav (`PlanthorBottomNav`) with Riverpod state |
+| `navigation` | Complete | 3-tab bottom nav (`PlanthorBottomNav`), GoRouter ShellRoute, Riverpod tab index |
 | `plans` | In Progress | PlansScreen dashboard, PlanCard, PlanProgressRing — demo data only; API wiring pending |
 | `connect_apps` | In Progress | ConnectAppsScreen + `StravaConnectionProvider` — UI complete, OAuth stubbed |
 | `my_garden` | In Progress | Active Plans fetch from API; create/edit/delete not yet built |
@@ -147,5 +164,5 @@ The following screens display placeholder values until real API endpoints are wi
 3. Create a `FutureProvider` in `bloc/` that watches `apiClientProvider`
 4. Build the screen as a `ConsumerWidget` using `plansAsync.when(loading:, error:, data:)`
 5. If you need mutable state or actions, use a `@riverpod` class instead and run `build_runner`
-6. Add the screen to `MainScaffold` bottom nav items
+6. Add a GoRoute inside the `ShellRoute` in `lib/core/router/app_router.dart` and a tab entry in `PlanthorBottomNav._items` + `MainScaffold._tabRoutes`
 7. Add a widget test in `test/`

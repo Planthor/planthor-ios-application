@@ -110,7 +110,25 @@ ref.invalidate(personalPlansProvider);
 | Provider | File | Fetches |
 |----------|------|---------|
 | `personalPlansProvider` | `lib/features/my_garden/bloc/personal_plans_provider.dart` | `GET /v1/members/me/PersonalPlans` |
+| `localStoreProvider` | `lib/core/storage/local_store.dart` | `SharedPreferences.getInstance()` — async init, returns `LocalStore` |
 | `apiClientProvider` | `lib/core/network/api_client.dart` | `Provider<Dio>` (not async, but plain Provider — same pattern) |
+| `appRouterProvider` | `lib/core/router/app_router.dart` | `Provider<GoRouter>` — reads `authProvider` for redirect guard |
+
+### Using `localStoreProvider`
+
+```dart
+// Read (async — must handle loading/error)
+final storeAsync = ref.watch(localStoreProvider);
+final store = storeAsync.valueOrNull;
+
+// Or inside a FutureProvider / notifier build()
+final store = await ref.watch(localStoreProvider.future);
+await store.set('last_sync', DateTime.now().toIso8601String());
+final value = store.get<String>('last_sync');
+await store.remove('last_sync');
+```
+
+Supported types: `String`, `int`, `double`, `bool`, `List<String>`.
 
 ---
 

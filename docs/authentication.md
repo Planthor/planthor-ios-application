@@ -31,7 +31,7 @@ flutter_appauth exchanges code for tokens (PKCE)
 KeycloakAuthDatasource persists tokens to flutter_secure_storage
   │
   ▼
-authProvider state updates → main.dart routes to MainScaffold
+authProvider state updates → GoRouter redirect guard fires → navigates to /home
 ```
 
 ## Key Classes
@@ -51,7 +51,7 @@ authProvider state updates → main.dart routes to MainScaffold
 - **App startup:** `build()` in `Auth` notifier calls `getStoredToken()` — auto-login if valid
 - **Expiry:** `AuthToken.isExpired` checks `expiresAt`; datasource clears expired tokens on read
 - **Logout:** `signOut()` clears secure storage, resets provider state to `null`
-- **Refresh:** not yet implemented — expired tokens send the user back to `SignInScreen`
+- **Refresh:** `build()` attempts `refreshTokens()` on startup if stored access token is expired. Silent refresh uses the `refresh_token` grant via `flutter_appauth`. On failure, user is redirected to `SignInScreen` via GoRouter guard.
 
 ## Token Storage Keys (flutter_secure_storage)
 
