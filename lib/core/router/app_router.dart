@@ -10,7 +10,9 @@ import 'package:planthor_ios_application/features/plant_discovery/presentation/d
 
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(Ref ref) {
-    ref.listen(authProvider, (_, _) => notifyListeners());
+    final sub = ref.listen(authProvider, (_, _) => notifyListeners());
+    ref.onDispose(sub.close);
+    ref.onDispose(dispose);
   }
 }
 

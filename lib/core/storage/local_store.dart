@@ -15,7 +15,11 @@ class SharedPreferencesLocalStore implements LocalStore {
   final SharedPreferences _prefs;
 
   @override
-  T? get<T>(String key) => _prefs.get(key) as T?;
+  T? get<T>(String key) {
+    final value = _prefs.get(key);
+    if (value is T) return value;
+    return null;
+  }
 
   @override
   Future<void> set<T>(String key, T value) async {

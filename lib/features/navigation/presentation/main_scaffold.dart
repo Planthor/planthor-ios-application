@@ -7,7 +7,6 @@ import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
 import 'package:planthor_ios_application/core/widgets/planthor_bottom_nav.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
-import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -24,10 +23,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
   bool _welcomeShown = false;
 
+  int _indexFromLocation(String location) {
+    if (location.startsWith('/plans')) return 1;
+    if (location.startsWith('/settings')) return 2;
+    return 0;
+  }
+
   void _onTabTap(int newIndex) {
-    final current = ref.read(navigationProvider);
-    if (newIndex == current) return;
-    ref.read(navigationProvider.notifier).setIndex(newIndex);
     context.go(_tabRoutes[newIndex]);
   }
 
@@ -70,7 +72,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     // Eagerly watch to trigger MemberSessionFilter JIT provisioning on first load.
     ref.watch(personalPlansProvider);
 
-    final selectedIndex = ref.watch(navigationProvider);
+    final location = GoRouterState.of(context).matchedLocation;
+    final selectedIndex = _indexFromLocation(location);
 
     return Scaffold(
       appBar: const PlanthorAppBar(),

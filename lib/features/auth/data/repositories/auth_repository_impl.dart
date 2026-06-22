@@ -19,4 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthToken?> refreshTokens() => _datasource.refreshTokens();
+
+  @override
+  Future<String?> getMemberId() => _datasource.getMemberId();
+
+  @override
+  Future<void> saveMemberId(String id) => _datasource.saveMemberId(id);
 }

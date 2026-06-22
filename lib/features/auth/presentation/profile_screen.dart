@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
 import 'package:planthor_ios_application/features/auth/presentation/personal_information_screen.dart';
+import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
 import 'package:planthor_ios_application/features/connect_apps/presentation/connect_apps_screen.dart';
 import 'package:planthor_ios_application/features/connect_apps/providers/strava_connection_provider.dart';
 
@@ -128,16 +130,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 class _ProfileHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final token = authState.value;
-    final userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
-    final displayName = (userClaims?['name'] as String?) ??
-        (userClaims?['preferred_username'] as String?) ??
-        'User';
+    final memberAsync = ref.watch(memberProfileProvider);
+    final member = memberAsync.valueOrNull;
+
+    // Fallback to JWT claims when member UUID not yet stored
+    final String displayName;
+    final String avatarUrl;
+    if (member != null) {
+      displayName = member.displayName;
+      final raw = member.pathAvatar;
+      avatarUrl = raw.isEmpty
+          ? ''
+          : raw.startsWith('http')
+              ? raw
+              : '${AppConfig.apiBase}/$raw';
+    } else {
+      final token = ref.watch(authProvider).valueOrNull;
+      final claims = token != null ? decodeJwtPayload(token.accessToken) : null;
+      displayName = (claims?['name'] as String?) ??
+          (claims?['preferred_username'] as String?) ??
+          'User';
+      avatarUrl = claims?['avatarUrl'] as String? ?? '';
+    }
 
     return Column(
       children: [
-        // Avatar with edit overlay
         Stack(
           alignment: Alignment.bottomRight,
           children: [
@@ -147,10 +164,7 @@ class _ProfileHeader extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surfaceContainer,
-                border: Border.all(
-                  color: AppColors.surfaceCard,
-                  width: 4,
-                ),
+                border: Border.all(color: AppColors.surfaceCard, width: 4),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x14000000),
@@ -159,12 +173,22 @@ class _ProfileHeader extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const ClipOval(
-                child: Icon(
-                  Icons.person,
-                  size: 52,
-                  color: AppColors.textMuted,
-                ),
+              child: ClipOval(
+                child: avatarUrl.isNotEmpty
+                    ? Image.network(
+                        avatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.person,
+                          size: 52,
+                          color: AppColors.textMuted,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 52,
+                        color: AppColors.textMuted,
+                      ),
               ),
             ),
             Container(
@@ -182,23 +206,25 @@ class _ProfileHeader extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.edit,
-                size: 14,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.edit, size: 14, color: Colors.white),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        Text(
-          displayName,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textMain,
-          ),
-        ),
+        memberAsync.isLoading
+            ? const SizedBox(
+                height: 28,
+                width: 28,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(
+                displayName,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textMain,
+                ),
+              ),
       ],
     );
   }

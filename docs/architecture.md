@@ -64,8 +64,8 @@ authProvider           (AsyncNotifier<AuthToken?>) — @riverpod class
   └─ AuthRepositoryImpl
        └─ KeycloakAuthDatasource
 
-navigationProvider     (Notifier<int>)             — @riverpod class
-  └─ tracks selected bottom nav tab index (0=Home, 1=Plans, 2=Settings)
+navigationProvider     (Notifier<int>)             — @riverpod class (unused by MainScaffold)
+  └─ tab index now derived from GoRouterState.matchedLocation; provider retained for future use
 
 appThemeProvider       (Notifier<ThemeData>)       — @riverpod class
 

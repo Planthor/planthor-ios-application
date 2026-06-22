@@ -31,7 +31,7 @@ Defined in `lib/core/router/app_router.dart`. Runs on every navigation event and
 | Authenticated + on `/sign-in` or `/` | `/home` |
 | Otherwise | no redirect |
 
-The guard re-evaluates automatically because `appRouterProvider` wraps `authProvider` in a `ChangeNotifier` (`_AuthRefreshNotifier`) and passes it to GoRouter's `refreshListenable`. No manual navigation calls are needed after sign-in or sign-out.
+The guard re-evaluates automatically because `appRouterProvider` wraps `authProvider` in a `ChangeNotifier` (`_AuthRefreshNotifier`) and passes it to GoRouter's `refreshListenable`. No manual navigation calls are needed after sign-in or sign-out. The `ref.listen` subscription and the notifier itself are both disposed via `ref.onDispose` when the provider is torn down.
 
 ## Main Stack Shell
 
@@ -41,7 +41,7 @@ The guard re-evaluates automatically because `appRouterProvider` wraps `authProv
 - `PlanthorBottomNav` (3-tab bottom navigation)
 - `widget.child` — the currently routed screen
 
-`navigationProvider` (`int`) tracks the active tab index for bottom nav highlighting. Tab taps call both `ref.read(navigationProvider.notifier).setIndex(index)` and `context.go(route)`.
+`MainScaffold` derives the active tab index directly from `GoRouterState.of(context).matchedLocation`, so the bottom nav highlight stays correct after deep-links, Android back-button presses, and any programmatic `context.go(...)` call. Tab taps call `context.go(route)`; no separate index state is maintained.
 
 ## Adding a New Tab
 
