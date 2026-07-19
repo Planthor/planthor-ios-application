@@ -1,10 +1,24 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
 
 final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBase));
+
+  // Bypass SSL verification for local dev (self-signed cert on localhost).
+  if (!AppConfig.isProduction) {
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.badCertificateCallback = (_, _, _) => true;
+        return client;
+      },
+    );
+  }
 
   // Inject token at request time so late-resolving auth state is always current.
   // On 401: attempt silent token refresh and retry the request once.

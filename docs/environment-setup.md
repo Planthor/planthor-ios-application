@@ -6,7 +6,7 @@
 - Dart SDK ^3.11.5 (bundled with Flutter)
 - Xcode ≥ 15 (iOS builds)
 - Android Studio + Android SDK API 35+ (Android builds)
-- CocoaPods (`sudo gem install cocoapods` — iOS dependency manager)
+- CocoaPods **1.16.2+** — install via Homebrew (`brew install cocoapods`). The system Ruby gem version (1.11.3) is incompatible with Xcode 16+ / Xcode 26 because it can't parse `XCLocalSwiftPackageReference` entries in the Xcode project.
 - Docker + Docker Compose (for local Keycloak + API server)
 
 ## 1. Clone and Install
@@ -85,7 +85,17 @@ dart run build_runner clean
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-**CocoaPods version mismatch**
+**CocoaPods fails with `XCLocalSwiftPackageReference` error**
+
+System Ruby gem CocoaPods (1.11.3) is too old for Xcode 16+/26. Install the Homebrew version:
+
+```bash
+brew install cocoapods
+```
+
+Ensure `/opt/homebrew/bin` precedes `/usr/local/bin` in `$PATH` so `pod` resolves to the Homebrew install. Then retry `flutter run` or `pod install`.
+
+**CocoaPods version mismatch / stale lockfile**
 
 ```bash
 cd ios

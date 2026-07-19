@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
 import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
+import 'package:planthor_ios_application/features/auth/domain/entities/member.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
 
 class PersonalInformationScreen extends ConsumerStatefulWidget {
   const PersonalInformationScreen({super.key});
@@ -17,50 +19,69 @@ class PersonalInformationScreen extends ConsumerStatefulWidget {
 class _PersonalInformationScreenState
     extends ConsumerState<PersonalInformationScreen> {
   late final TextEditingController _firstNameController;
+  late final TextEditingController _middleNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _emailController;
-  late final TextEditingController _phoneController;
+  late final TextEditingController _descriptionController;
+
+  bool _populatedFromApi = false;
 
   @override
   void initState() {
     super.initState();
-    final authState = ref.read(authProvider);
-    final token = authState.value;
-    Map<String, dynamic>? userClaims;
-    try {
-      userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
-    } catch (_) {}
+    final claims = _readClaims();
 
     String firstName = '';
     String lastName = '';
-    
-    if (userClaims?['given_name'] != null) {
-      firstName = userClaims!['given_name'] as String;
-      lastName = (userClaims['family_name'] as String?) ?? '';
-    } else if (userClaims?['name'] != null) {
-      final parts = (userClaims!['name'] as String).split(' ');
+    if (claims?['given_name'] != null) {
+      firstName = claims!['given_name'] as String;
+      lastName = (claims['family_name'] as String?) ?? '';
+    } else if (claims?['name'] != null) {
+      final parts = (claims!['name'] as String).split(' ');
       firstName = parts.isNotEmpty ? parts.first : '';
       lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
     }
 
     _firstNameController = TextEditingController(text: firstName);
+    _middleNameController = TextEditingController(
+      text: claims?['middle_name'] as String? ?? '',
+    );
     _lastNameController = TextEditingController(text: lastName);
     _emailController = TextEditingController(
-      text: (userClaims?['email'] as String?) ??
-          (userClaims?['preferred_username'] as String?) ??
+      text:
+          (claims?['email'] as String?) ??
+          (claims?['preferred_username'] as String?) ??
           '',
     );
-    _phoneController = TextEditingController(
-      text: (userClaims?['phone_number'] as String?) ?? '',
-    );
+    _descriptionController = TextEditingController();
+  }
+
+  Map<String, dynamic>? _readClaims() {
+    final token = ref.read(authProvider).valueOrNull;
+    if (token == null) return null;
+    try {
+      return decodeJwtPayload(token.accessToken);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _populateFromMember(Member member) {
+    if (_populatedFromApi) return;
+    _populatedFromApi = true;
+    _firstNameController.text = member.firstName;
+    _middleNameController.text = member.middleName ?? '';
+    _lastNameController.text = member.lastName;
+    _descriptionController.text = member.description ?? '';
   }
 
   @override
   void dispose() {
     _firstNameController.dispose();
+    _middleNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -75,12 +96,26 @@ class _PersonalInformationScreenState
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final token = authState.value;
-    final userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
-    final displayName = (userClaims?['name'] as String?) ??
-        (userClaims?['preferred_username'] as String?) ??
+    ref.listen<AsyncValue<Member?>>(memberProfileProvider, (_, next) {
+      final member = next.valueOrNull;
+      if (member != null) _populateFromMember(member);
+    });
+
+    // Populate immediately if already resolved (e.g. cache hit)
+    final memberAsync = ref.watch(memberProfileProvider);
+    if (memberAsync.valueOrNull != null) {
+      _populateFromMember(memberAsync.valueOrNull!);
+    }
+
+    final claims = _readClaims();
+    final displayName =
+        (claims?['name'] as String?) ??
+        (claims?['preferred_username'] as String?) ??
         'User';
+
+    final avatarUrl = memberAsync.valueOrNull?.pathAvatar.isNotEmpty == true
+        ? memberAsync.valueOrNull!.pathAvatar
+        : (claims?['avatarUrl'] as String?) ?? '';
 
     return Scaffold(
       appBar: const PlanthorAppBar(showBack: true),
@@ -111,7 +146,7 @@ class _PersonalInformationScreenState
             Center(
               child: Column(
                 children: [
-                  _AvatarWithEdit(),
+                  _AvatarWithEdit(avatarUrl: avatarUrl),
                   const SizedBox(height: 16),
                   Text(
                     displayName,
@@ -152,11 +187,18 @@ class _PersonalInformationScreenState
         children: [
           _buildField('First Name', _firstNameController),
           const SizedBox(height: 20),
+          _buildField('Middle Name', _middleNameController),
+          const SizedBox(height: 20),
           _buildField('Last Name', _lastNameController),
           const SizedBox(height: 20),
-          _buildField('Email Address', _emailController, TextInputType.emailAddress),
+          _buildField(
+            'Email Address',
+            _emailController,
+            keyboardType: TextInputType.emailAddress,
+            readOnly: true,
+          ),
           const SizedBox(height: 20),
-          _buildField('Phone Number', _phoneController, TextInputType.phone),
+          _buildField('Description', _descriptionController, maxLines: 3),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _handleSave,
@@ -182,7 +224,13 @@ class _PersonalInformationScreenState
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, [TextInputType? keyboardType]) {
+  Widget _buildField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    int maxLines = 1,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -198,14 +246,21 @@ class _PersonalInformationScreenState
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          readOnly: readOnly,
+          maxLines: maxLines,
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: AppColors.textMain,
+            color: readOnly ? AppColors.textMuted : AppColors.textMain,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.surfaceBackground,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            fillColor: readOnly
+                ? AppColors.surfaceContainer
+                : AppColors.surfaceBackground,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: AppColors.borderSubtle),
@@ -226,6 +281,10 @@ class _PersonalInformationScreenState
 }
 
 class _AvatarWithEdit extends StatelessWidget {
+  const _AvatarWithEdit({required this.avatarUrl});
+
+  final String avatarUrl;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -246,10 +305,16 @@ class _AvatarWithEdit extends StatelessWidget {
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 60,
               backgroundColor: AppColors.surfaceContainerLow,
-              child: Icon(Icons.person, size: 64, color: AppColors.outline),
+              backgroundImage: avatarUrl.isNotEmpty
+                  ? NetworkImage(avatarUrl)
+                  : null,
+              onBackgroundImageError: avatarUrl.isNotEmpty ? (_, _) {} : null,
+              child: avatarUrl.isEmpty
+                  ? const Icon(Icons.person, size: 64, color: AppColors.outline)
+                  : null,
             ),
           ),
           Positioned(

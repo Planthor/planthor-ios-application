@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
 import 'package:planthor_ios_application/features/auth/presentation/personal_information_screen.dart';
+import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
 import 'package:planthor_ios_application/features/connect_apps/presentation/connect_apps_screen.dart';
 import 'package:planthor_ios_application/features/connect_apps/providers/strava_connection_provider.dart';
 
@@ -54,7 +56,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: Icons.person_outline,
                   title: 'Personal Information',
                   subtitle: 'Name, Email, Password',
-                  onTap: () => Navigator.of(context).push(
+                  onTap: () => Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const PersonalInformationScreen(),
                     ),
@@ -128,16 +130,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 class _ProfileHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final token = authState.value;
-    final userClaims = token != null ? decodeJwtPayload(token.accessToken) : null;
-    final displayName = (userClaims?['name'] as String?) ??
-        (userClaims?['preferred_username'] as String?) ??
-        'User';
+    final memberAsync = ref.watch(memberProfileProvider);
+    final member = memberAsync.valueOrNull;
+
+    // Fallback to JWT claims when member UUID not yet stored
+    final String displayName;
+    final String avatarUrl;
+    if (member != null) {
+      displayName = member.displayName;
+      final raw = member.pathAvatar;
+      avatarUrl = raw.isEmpty
+          ? ''
+          : raw.startsWith('http')
+          ? raw
+          : '${AppConfig.apiBase}/$raw';
+    } else {
+      final token = ref.watch(authProvider).valueOrNull;
+      final claims = token != null ? decodeJwtPayload(token.accessToken) : null;
+      displayName =
+          (claims?['name'] as String?) ??
+          (claims?['preferred_username'] as String?) ??
+          'User';
+      avatarUrl = claims?['avatarUrl'] as String? ?? '';
+    }
 
     return Column(
       children: [
-        // Avatar with edit overlay
         Stack(
           alignment: Alignment.bottomRight,
           children: [
@@ -147,10 +165,7 @@ class _ProfileHeader extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surfaceContainer,
-                border: Border.all(
-                  color: AppColors.surfaceCard,
-                  width: 4,
-                ),
+                border: Border.all(color: AppColors.surfaceCard, width: 4),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x14000000),
@@ -159,12 +174,22 @@ class _ProfileHeader extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const ClipOval(
-                child: Icon(
-                  Icons.person,
-                  size: 52,
-                  color: AppColors.textMuted,
-                ),
+              child: ClipOval(
+                child: avatarUrl.isNotEmpty
+                    ? Image.network(
+                        avatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.person,
+                          size: 52,
+                          color: AppColors.textMuted,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 52,
+                        color: AppColors.textMuted,
+                      ),
               ),
             ),
             Container(
@@ -182,11 +207,7 @@ class _ProfileHeader extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.edit,
-                size: 14,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.edit, size: 14, color: Colors.white),
             ),
           ],
         ),
@@ -432,21 +453,13 @@ class _SettingsRowNav extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: AppColors.outline,
-                ),
+                Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
               ],
             ),
           ),
         ),
         if (showDivider)
-          const Divider(
-            height: 1,
-            indent: 70,
-            color: AppColors.borderSubtle,
-          ),
+          const Divider(height: 1, indent: 70, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -501,23 +514,16 @@ class _RadioRow extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  selected
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
                   size: 22,
-                  color: selected
-                      ? AppColors.planthorBlue
-                      : AppColors.outline,
+                  color: selected ? AppColors.planthorBlue : AppColors.outline,
                 ),
               ],
             ),
           ),
         ),
         if (showDivider)
-          const Divider(
-            height: 1,
-            color: AppColors.borderSubtle,
-          ),
+          const Divider(height: 1, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -591,11 +597,7 @@ class _ToggleRow extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(
-          height: 1,
-          indent: 70,
-          color: AppColors.borderSubtle,
-        ),
+        const Divider(height: 1, indent: 70, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -633,11 +635,7 @@ class _SignOutButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.logout,
-              size: 20,
-              color: AppColors.planOverdue,
-            ),
+            const Icon(Icons.logout, size: 20, color: AppColors.planOverdue),
             const SizedBox(width: 8),
             Text(
               'Sign out',
@@ -672,10 +670,8 @@ class _ConnectToAppsRow extends ConsumerWidget {
       icon: Icons.watch_outlined,
       title: 'Connect to apps',
       subtitle: subtitle,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const ConnectAppsScreen(),
-        ),
+      onTap: () => Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute<void>(builder: (_) => const ConnectAppsScreen()),
       ),
       showDivider: false,
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
-import 'package:planthor_ios_application/features/navigation/presentation/main_scaffold.dart';
 
 class SignInScreen extends ConsumerWidget {
   const SignInScreen({super.key});
@@ -11,15 +10,6 @@ class SignInScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
-        data: (token) {
-          if (token != null) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => const MainScaffold(showWelcome: true),
-              ),
-            );
-          }
-        },
         error: (error, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Sign in failed: $error')),

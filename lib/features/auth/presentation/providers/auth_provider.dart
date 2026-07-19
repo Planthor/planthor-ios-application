@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:planthor_ios_application/features/auth/data/datasources/member_datasource.dart';
 import 'package:planthor_ios_application/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 import 'package:planthor_ios_application/features/auth/domain/repositories/auth_repository.dart';
@@ -20,7 +21,12 @@ class Auth extends _$Auth {
   Future<void> signIn() async {
     if (state.isLoading) return;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_repository.signIn);
+    state = await AsyncValue.guard(() async {
+      final token = await _repository.signIn();
+      final memberId = await createMemberIfNeeded(token.accessToken);
+      if (memberId != null) await _repository.saveMemberId(memberId);
+      return token;
+    });
   }
 
   Future<void> signOut() async {

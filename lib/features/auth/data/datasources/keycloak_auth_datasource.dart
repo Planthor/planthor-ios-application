@@ -7,6 +7,7 @@ class KeycloakAuthDatasource {
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _tokenExpiryKey = 'token_expiry';
+  static const _memberIdKey = 'member_id';
 
   final FlutterAppAuth _appAuth;
   final FlutterSecureStorage _storage;
@@ -107,8 +108,18 @@ class KeycloakAuthDatasource {
     return token;
   }
 
+  Future<String?> getMemberId() => _storage.read(key: _memberIdKey);
+
+  Future<void> saveMemberId(String id) =>
+      _storage.write(key: _memberIdKey, value: id);
+
   Future<void> clearTokens() async {
-    await _storage.deleteAll();
+    await Future.wait([
+      _storage.delete(key: _accessTokenKey),
+      _storage.delete(key: _refreshTokenKey),
+      _storage.delete(key: _tokenExpiryKey),
+      // _memberIdKey is intentionally kept across sign-out
+    ]);
   }
 
   Future<void> _persistToken(AuthToken token) async {

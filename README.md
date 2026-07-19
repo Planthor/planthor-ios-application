@@ -53,6 +53,8 @@ flutter run
 
 > Re-run `build_runner` whenever you modify a provider or annotated model.
 
+**New to this project?** Start with the [Flutter Onboarding Guide](docs/ONBOARDING.md) for the app's architecture, state, navigation, API flow, testing, and first-contribution workflow.
+
 ## Architecture
 
 ```mermaid
