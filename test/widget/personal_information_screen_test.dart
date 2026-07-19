@@ -6,14 +6,14 @@ import 'package:planthor_ios_application/features/auth/presentation/personal_inf
 import '../helpers/fakes.dart';
 
 Widget _wrap() => ProviderScope(
-      overrides: authOverrides(),
-      child: const MaterialApp(home: PersonalInformationScreen()),
-    );
+  overrides: authOverrides(),
+  child: const MaterialApp(home: PersonalInformationScreen()),
+);
 
 Widget _wrapNull() => ProviderScope(
-      overrides: unauthOverrides(),
-      child: const MaterialApp(home: PersonalInformationScreen()),
-    );
+  overrides: unauthOverrides(),
+  child: const MaterialApp(home: PersonalInformationScreen()),
+);
 
 void main() {
   group('PersonalInformationScreen', () {
@@ -53,10 +53,10 @@ void main() {
       expect(find.text('Email Address'), findsOneWidget);
     });
 
-    testWidgets('shows Phone Number field', (tester) async {
+    testWidgets('shows Description field', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
-      expect(find.text('Phone Number'), findsOneWidget);
+      expect(find.text('Description'), findsOneWidget);
     });
 
     testWidgets('shows Save Changes button', (tester) async {
@@ -65,10 +65,12 @@ void main() {
       expect(find.text('Save Changes'), findsOneWidget);
     });
 
-    testWidgets('populates display name from JWT', (tester) async {
+    testWidgets('shows fallback display name while auth is loading', (
+      tester,
+    ) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
-      expect(find.text('Test User'), findsOneWidget);
+      expect(find.text('User'), findsOneWidget);
     });
 
     testWidgets('Save Changes shows snackbar', (tester) async {

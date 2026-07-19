@@ -6,18 +6,15 @@ import 'package:planthor_ios_application/features/connect_apps/providers/strava_
 
 import '../helpers/fakes.dart';
 
-Widget _wrap({StravaConnectionStatus stravaStatus = StravaConnectionStatus.disconnected}) =>
-    ProviderScope(
-      overrides: [
-        ...authOverrides(),
-        stravaConnectionProvider.overrideWith(
-          () => _FakeStrava(stravaStatus),
-        ),
-      ],
-      child: const MaterialApp(
-        home: Scaffold(body: ProfileScreen()),
-      ),
-    );
+Widget _wrap({
+  StravaConnectionStatus stravaStatus = StravaConnectionStatus.disconnected,
+}) => ProviderScope(
+  overrides: [
+    ...authOverrides(),
+    stravaConnectionProvider.overrideWith(() => _FakeStrava(stravaStatus)),
+  ],
+  child: const MaterialApp(home: Scaffold(body: ProfileScreen())),
+);
 
 class _FakeStrava extends StravaConnection {
   _FakeStrava(this._status);
@@ -99,7 +96,9 @@ void main() {
     testWidgets('toggling Miles radio updates state', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
-      await tester.tap(find.text('Miles'));
+      final miles = find.text('Miles');
+      await tester.ensureVisible(miles);
+      await tester.tap(miles);
       await tester.pump();
       expect(tester.takeException(), isNull);
     });
@@ -109,6 +108,7 @@ void main() {
       await tester.pump();
       final switchFinder = find.byType(Switch);
       if (switchFinder.evaluate().isNotEmpty) {
+        await tester.ensureVisible(switchFinder.first);
         await tester.tap(switchFinder.first);
         await tester.pump();
       }
@@ -116,7 +116,9 @@ void main() {
     });
 
     testWidgets('renders connected Strava state', (tester) async {
-      await tester.pumpWidget(_wrap(stravaStatus: StravaConnectionStatus.connected));
+      await tester.pumpWidget(
+        _wrap(stravaStatus: StravaConnectionStatus.connected),
+      );
       await tester.pump();
       expect(tester.takeException(), isNull);
     });

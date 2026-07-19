@@ -48,7 +48,8 @@ class _PersonalInformationScreenState
     );
     _lastNameController = TextEditingController(text: lastName);
     _emailController = TextEditingController(
-      text: (claims?['email'] as String?) ??
+      text:
+          (claims?['email'] as String?) ??
           (claims?['preferred_username'] as String?) ??
           '',
     );
@@ -107,7 +108,8 @@ class _PersonalInformationScreenState
     }
 
     final claims = _readClaims();
-    final displayName = (claims?['name'] as String?) ??
+    final displayName =
+        (claims?['name'] as String?) ??
         (claims?['preferred_username'] as String?) ??
         'User';
 
@@ -135,7 +137,10 @@ class _PersonalInformationScreenState
             const SizedBox(height: 8),
             Text(
               'Update your profile details and contact information.',
-              style: GoogleFonts.inter(fontSize: 16, color: AppColors.textMuted),
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: AppColors.textMuted,
+              ),
             ),
             const SizedBox(height: 32),
             Center(
@@ -143,20 +148,14 @@ class _PersonalInformationScreenState
                 children: [
                   _AvatarWithEdit(avatarUrl: avatarUrl),
                   const SizedBox(height: 16),
-                  memberAsync.isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          displayName,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMain,
-                          ),
-                        ),
+                  Text(
+                    displayName,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textMain,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -199,11 +198,7 @@ class _PersonalInformationScreenState
             readOnly: true,
           ),
           const SizedBox(height: 20),
-          _buildField(
-            'Description',
-            _descriptionController,
-            maxLines: 3,
-          ),
+          _buildField('Description', _descriptionController, maxLines: 3),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _handleSave,
@@ -218,7 +213,10 @@ class _PersonalInformationScreenState
             ),
             child: Text(
               'Save Changes',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -259,8 +257,10 @@ class _PersonalInformationScreenState
             fillColor: readOnly
                 ? AppColors.surfaceContainer
                 : AppColors.surfaceBackground,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: AppColors.borderSubtle),
@@ -308,11 +308,10 @@ class _AvatarWithEdit extends StatelessWidget {
             child: CircleAvatar(
               radius: 60,
               backgroundColor: AppColors.surfaceContainerLow,
-              backgroundImage:
-                  avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
-              onBackgroundImageError: avatarUrl.isNotEmpty
-                  ? (_, _) {}
+              backgroundImage: avatarUrl.isNotEmpty
+                  ? NetworkImage(avatarUrl)
                   : null,
+              onBackgroundImageError: avatarUrl.isNotEmpty ? (_, _) {} : null,
               child: avatarUrl.isEmpty
                   ? const Icon(Icons.person, size: 64, color: AppColors.outline)
                   : null,

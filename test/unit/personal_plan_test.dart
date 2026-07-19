@@ -5,13 +5,16 @@ import 'package:planthor_ios_application/features/plans/domain/entities/personal
 void main() {
   group('PersonalPlan', () {
     test('fromJson maps id and name', () {
-      final plan = PersonalPlan.fromJson({'id': '1', 'name': 'My Plan'});
+      final plan = PersonalPlan.fromJson({
+        'planId': '1',
+        'planName': 'My Plan',
+      });
       expect(plan.id, '1');
       expect(plan.name, 'My Plan');
     });
 
     test('fromJson uses (unnamed) when name is null', () {
-      final plan = PersonalPlan.fromJson({'id': '2', 'name': null});
+      final plan = PersonalPlan.fromJson({'planId': '2', 'planName': null});
       expect(plan.name, '(unnamed)');
     });
 
@@ -21,26 +24,22 @@ void main() {
     });
 
     test('progress clamps to 1 when current exceeds target', () {
-      const plan =
-          PersonalPlan(id: '1', name: 'Test', target: 10, current: 20);
+      const plan = PersonalPlan(id: '1', name: 'Test', target: 10, current: 20);
       expect(plan.progress, 1.0);
     });
 
     test('progressPercent rounds correctly', () {
-      const plan =
-          PersonalPlan(id: '1', name: 'Test', target: 3, current: 1);
+      const plan = PersonalPlan(id: '1', name: 'Test', target: 3, current: 1);
       expect(plan.progressPercent, 33);
     });
 
     test('isComplete is true when progress >= 1', () {
-      const plan =
-          PersonalPlan(id: '1', name: 'Test', target: 10, current: 10);
+      const plan = PersonalPlan(id: '1', name: 'Test', target: 10, current: 10);
       expect(plan.isComplete, isTrue);
     });
 
     test('isComplete is false when progress < 1', () {
-      const plan =
-          PersonalPlan(id: '1', name: 'Test', target: 10, current: 5);
+      const plan = PersonalPlan(id: '1', name: 'Test', target: 10, current: 5);
       expect(plan.isComplete, isFalse);
     });
 

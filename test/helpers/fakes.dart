@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
@@ -28,12 +29,12 @@ String makeJwt({
 }
 
 AuthToken makeToken({bool expired = false}) => AuthToken(
-      accessToken: makeJwt(),
-      expiresAt: expired
-          ? DateTime.now().subtract(const Duration(hours: 1))
-          : DateTime.now().add(const Duration(hours: 1)),
-      refreshToken: 'fake-refresh-token',
-    );
+  accessToken: makeJwt(),
+  expiresAt: expired
+      ? DateTime.now().subtract(const Duration(hours: 1))
+      : DateTime.now().add(const Duration(hours: 1)),
+  refreshToken: 'fake-refresh-token',
+);
 
 // Extends Auth (not _$Auth) so overrideWith type-checks correctly.
 class FakeAuth extends Auth {
@@ -78,17 +79,15 @@ class FakeNavigation extends Navigation {
 }
 
 List<Override> authOverrides({AuthToken? token}) => [
-      authProvider.overrideWith(() => FakeAuth(token)),
-      navigationProvider.overrideWith(FakeNavigation.new),
-      personalPlansProvider.overrideWith(
-        (ref) async => <PersonalPlan>[],
-      ),
-    ];
+  authProvider.overrideWith(() => FakeAuth(token)),
+  memberProfileProvider.overrideWith((ref) async => null),
+  navigationProvider.overrideWith(FakeNavigation.new),
+  personalPlansProvider.overrideWith((ref) async => <PersonalPlan>[]),
+];
 
 List<Override> unauthOverrides() => [
-      authProvider.overrideWith(FakeAuthNull.new),
-      navigationProvider.overrideWith(FakeNavigation.new),
-      personalPlansProvider.overrideWith(
-        (ref) async => <PersonalPlan>[],
-      ),
-    ];
+  authProvider.overrideWith(FakeAuthNull.new),
+  memberProfileProvider.overrideWith((ref) async => null),
+  navigationProvider.overrideWith(FakeNavigation.new),
+  personalPlansProvider.overrideWith((ref) async => <PersonalPlan>[]),
+];

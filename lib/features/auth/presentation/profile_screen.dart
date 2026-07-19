@@ -142,12 +142,13 @@ class _ProfileHeader extends ConsumerWidget {
       avatarUrl = raw.isEmpty
           ? ''
           : raw.startsWith('http')
-              ? raw
-              : '${AppConfig.apiBase}/$raw';
+          ? raw
+          : '${AppConfig.apiBase}/$raw';
     } else {
       final token = ref.watch(authProvider).valueOrNull;
       final claims = token != null ? decodeJwtPayload(token.accessToken) : null;
-      displayName = (claims?['name'] as String?) ??
+      displayName =
+          (claims?['name'] as String?) ??
           (claims?['preferred_username'] as String?) ??
           'User';
       avatarUrl = claims?['avatarUrl'] as String? ?? '';
@@ -211,20 +212,14 @@ class _ProfileHeader extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 16),
-        memberAsync.isLoading
-            ? const SizedBox(
-                height: 28,
-                width: 28,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Text(
-                displayName,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textMain,
-                ),
-              ),
+        Text(
+          displayName,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textMain,
+          ),
+        ),
       ],
     );
   }
@@ -458,21 +453,13 @@ class _SettingsRowNav extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: AppColors.outline,
-                ),
+                Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
               ],
             ),
           ),
         ),
         if (showDivider)
-          const Divider(
-            height: 1,
-            indent: 70,
-            color: AppColors.borderSubtle,
-          ),
+          const Divider(height: 1, indent: 70, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -527,23 +514,16 @@ class _RadioRow extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  selected
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
                   size: 22,
-                  color: selected
-                      ? AppColors.planthorBlue
-                      : AppColors.outline,
+                  color: selected ? AppColors.planthorBlue : AppColors.outline,
                 ),
               ],
             ),
           ),
         ),
         if (showDivider)
-          const Divider(
-            height: 1,
-            color: AppColors.borderSubtle,
-          ),
+          const Divider(height: 1, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -617,11 +597,7 @@ class _ToggleRow extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(
-          height: 1,
-          indent: 70,
-          color: AppColors.borderSubtle,
-        ),
+        const Divider(height: 1, indent: 70, color: AppColors.borderSubtle),
       ],
     );
   }
@@ -659,11 +635,7 @@ class _SignOutButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.logout,
-              size: 20,
-              color: AppColors.planOverdue,
-            ),
+            const Icon(Icons.logout, size: 20, color: AppColors.planOverdue),
             const SizedBox(width: 8),
             Text(
               'Sign out',
@@ -699,9 +671,7 @@ class _ConnectToAppsRow extends ConsumerWidget {
       title: 'Connect to apps',
       subtitle: subtitle,
       onTap: () => Navigator.of(context, rootNavigator: true).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const ConnectAppsScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const ConnectAppsScreen()),
       ),
       showDivider: false,
     );
