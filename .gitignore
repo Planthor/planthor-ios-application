@@ -1,6 +1,7 @@
 # Miscellaneous
 *.class
 *.log
+*.tmp
 *.pyc
 *.swp
 .DS_Store
@@ -43,11 +44,25 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/local.properties
+
+# Xcode user-specific state
+**/xcuserdata/
+*.xcuserstate
+DerivedData/
 
 # Environment / secrets — never commit real values
 .env
+.env.*
+!.env.example
 dart_defines/*.json
 !dart_defines/*.example.json
+
+# Local debugging output
+/debug.json
+
+# Flutter version manager — SDK checkout/cache is local
+.fvm/
 
 # AI tooling — local only
 .gemini/
