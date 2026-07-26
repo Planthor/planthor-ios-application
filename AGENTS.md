@@ -32,5 +32,4 @@ Use `flutter_test`. Name test files `<subject>_test.dart`, organize assertions w
 ## Commit & Pull Request Guidelines
 
 Recent history uses short conventional prefixes: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, and `chore:`. Write imperative, focused subjects, for example `feat: add plant list screen`. Keep commits scoped to one coherent change.
-
-PRs should explain the user-visible change, link the related issue when available, include screenshots for UI changes, and note any provider generation, configuration, or platform impact. Confirm `flutter analyze` and relevant tests pass before requesting review.
+flutter run --dart-define=ENV=dev include screenshots for UI changes, and note any provider generation, configuration, or platform impact. Confirm `flutter analyze` and relevant tests pass before requesting review.

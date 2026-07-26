@@ -14,7 +14,7 @@ void main() {
 
     test('initial state is disconnected', () {
       // listen keeps AutoDispose provider alive
-      container.listen(stravaConnectionProvider, (_, __) {});
+      container.listen(stravaConnectionProvider, (_, _) {});
       expect(
         container.read(stravaConnectionProvider),
         StravaConnectionStatus.disconnected,
@@ -22,7 +22,7 @@ void main() {
     });
 
     test('connect transitions to connected after delay', () async {
-      container.listen(stravaConnectionProvider, (_, __) {});
+      container.listen(stravaConnectionProvider, (_, _) {});
       await container.read(stravaConnectionProvider.notifier).connect();
       expect(
         container.read(stravaConnectionProvider),
@@ -31,7 +31,7 @@ void main() {
     }, timeout: const Timeout(Duration(seconds: 10)));
 
     test('disconnect resets to disconnected', () async {
-      container.listen(stravaConnectionProvider, (_, __) {});
+      container.listen(stravaConnectionProvider, (_, _) {});
       await container.read(stravaConnectionProvider.notifier).connect();
       await container.read(stravaConnectionProvider.notifier).disconnect();
       expect(

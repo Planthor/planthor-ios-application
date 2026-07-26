@@ -5,7 +5,17 @@ import 'package:planthor_ios_application/features/plans/domain/entities/personal
 final personalPlansProvider = FutureProvider<List<PersonalPlan>>((ref) async {
   final dio = ref.watch(apiClientProvider);
   final response = await dio.get('/v1/members/me/PersonalPlans');
-  return (response.data as List)
+  return parsePersonalPlansResponse(response.data);
+});
+
+List<PersonalPlan> parsePersonalPlansResponse(Object? data) {
+  final items = switch (data) {
+    {'items': final List<dynamic> items} => items,
+    final List<dynamic> items => items,
+    _ => throw const FormatException('Invalid personal plans response'),
+  };
+
+  return items
       .map((e) => PersonalPlan.fromJson(e as Map<String, dynamic>))
       .toList();
-});
+}
