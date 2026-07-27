@@ -12,9 +12,9 @@ void main() {
       expect(find.text('Planthor'), findsOneWidget);
     });
 
-    testWidgets('shows notification bell by default', (tester) async {
+    testWidgets('shows profile avatar by default', (tester) async {
       await tester.pumpWidget(_wrap(const PlanthorAppBar()));
-      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+      expect(find.byKey(const Key('profile-avatar')), findsOneWidget);
     });
 
     testWidgets('no back button when showBack is false', (tester) async {
@@ -27,17 +27,17 @@ void main() {
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
-    testWidgets('preferredSize height is 64', (tester) async {
+    testWidgets('preferredSize height is 75', (tester) async {
       const bar = PlanthorAppBar();
-      expect(bar.preferredSize.height, 64);
+      expect(bar.preferredSize.height, 75);
     });
 
-    testWidgets('onNotification callback fires on bell tap', (tester) async {
+    testWidgets('onProfileTap callback fires on avatar tap', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        _wrap(PlanthorAppBar(onNotification: () => tapped = true)),
+        _wrap(PlanthorAppBar(onProfileTap: () => tapped = true)),
       );
-      await tester.tap(find.byIcon(Icons.notifications_outlined));
+      await tester.tap(find.byKey(const Key('profile-avatar')));
       expect(tapped, isTrue);
     });
   });

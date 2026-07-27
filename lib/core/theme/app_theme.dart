@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'app_colors.dart';
 
 part 'app_theme.g.dart';
@@ -14,29 +16,37 @@ class AppTheme extends _$AppTheme {
   static final ThemeData _lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.forestGreen,
-      primary: AppColors.forestGreen,
-      secondary: AppColors.leafGreen,
-      surface: AppColors.offWhite,
-      error: AppColors.error,
+      seedColor: AppColors.brand,
+      primary: AppColors.brand,
+      secondary: AppColors.positive,
+      surface: AppColors.surface,
+      error: AppColors.destructive,
     ),
-    scaffoldBackgroundColor: AppColors.offWhite,
+    scaffoldBackgroundColor: AppColors.background,
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.forestGreen,
-      foregroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
     ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        color: AppColors.earthBrown,
-        fontWeight: FontWeight.bold,
-      ),
-      bodyLarge: TextStyle(color: AppColors.earthBrown),
+    textTheme: GoogleFonts.montserratTextTheme().apply(
+      bodyColor: AppColors.textPrimary,
+      displayColor: AppColors.textPrimary,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.forestGreen,
+        backgroundColor: AppColors.brand,
         foregroundColor: Colors.white,
+        minimumSize: const Size(0, 56),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: AppColors.brand,
+      foregroundColor: Colors.white,
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
     ),
   );

@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // Canonical Figma semantic tokens.
+  static const Color background = Color(0xFFF7F9FB);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color textPrimary = Color(0xFF191C1E);
+  static const Color textSecondary = Color(0xFF414754);
+  static const Color brand = Color(0xFF1877F2);
+  static const Color brandDark = Color(0xFF0058BC);
+  static const Color brandHeader = Color(0xFF1D4ED8);
+  static const Color activeContainer = Color(0xFFEFF6FF);
+  static const Color controlSurface = Color(0xFFECEEF0);
+  static const Color metricSurface = Color(0xFFF2F4F6);
+  static const Color inactive = Color(0xFF94A3B8);
+  static const Color positive = Color(0xFF16A34A);
+  static const Color destructive = Color(0xFFBA1A1A);
+
   // Primary Green Palette
   static const Color forestGreen = Color(0xFF2D5A27);
   static const Color leafGreen = Color(0xFF4CAF50);
@@ -23,54 +38,56 @@ class AppColors {
 
   // ── Stitch Design System Tokens ──────────────────────────────────────────
   /// Planthor Blue — primary interactive, progress rings, FAB (#18A0FB)
-  static const Color planthorBlue = Color(0xFF18A0FB);
+  static const Color planthorBlue = brand;
 
   /// Achievement Green — 100%+ completed plans (#34D399)
-  static const Color achievementGreen = Color(0xFF34D399);
+  static const Color achievementGreen = positive;
 
   /// Primary dark — headings, active nav labels (#00629E)
-  static const Color primaryDark = Color(0xFF00629E);
+  static const Color primaryDark = brandDark;
 
   /// Surface background (#F5F6FF)
-  static const Color surfaceBackground = Color(0xFFF5F6FF);
+  static const Color surfaceBackground = background;
 
   /// White card surface (#FFFFFF)
-  static const Color surfaceCard = Color(0xFFFFFFFF);
+  static const Color surfaceCard = surface;
 
   /// Primary text (#111827)
-  static const Color textMain = Color(0xFF111827);
+  static const Color textMain = textPrimary;
 
   /// Muted / secondary text (#6B7280)
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color textMuted = textSecondary;
 
   /// Card border (#E5E7EB)
   static const Color borderSubtle = Color(0xFFE5E7EB);
 
   /// Primary container for active nav pill (#CCE9FF)
-  static const Color primaryContainer = Color(0xFFCCE9FF);
+  static const Color primaryContainer = activeContainer;
 
   /// On-primary-container text (#003458)
   static const Color onPrimaryContainer = Color(0xFF003458);
 
   /// Surface container low – "Details" button bg (#EDF0FF)
-  static const Color surfaceContainerLow = Color(0xFFEDF0FF);
+  static const Color surfaceContainerLow = controlSurface;
 
   /// Surface container – subtle backgrounds (#E0E8FF)
-  static const Color surfaceContainer = Color(0xFFE0E8FF);
+  static const Color surfaceContainer = metricSurface;
 
   /// Outline / secondary icon color (#6D778E)
-  static const Color outline = Color(0xFF6D778E);
+  static const Color outline = inactive;
 
   // ── Plan / Active Plans screen (legacy, kept for compatibility) ──────────
   static const Color planBlue = Color(0xFF18A0FB); // updated to Planthor Blue
   static const Color planBlueDark = Color(0xFF00629E);
-  static const Color planGreen = Color(0xFF34D399); // updated to Achievement Green
+  static const Color planGreen = Color(
+    0xFF34D399,
+  ); // updated to Achievement Green
   static const Color planTextDark = Color(0xFF111827);
   static const Color planTextSub = Color(0xFF6B7280);
   static const Color planChip = Color(0xFFECEEF0);
 
   // Plan status colors
-  static const Color planOverdue = Color(0xFFB31B25);
+  static const Color planOverdue = destructive;
   static const Color planOverdueLight = Color(0xFFFFDAD6);
   static const Color planUpcoming = Color(0xFFF59E0B);
   static const Color planUpcomingLight = Color(0xFFFEF3C7);

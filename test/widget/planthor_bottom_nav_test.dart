@@ -3,13 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:planthor_ios_application/core/widgets/planthor_bottom_nav.dart';
 
 Widget _wrap({required int index, ValueChanged<int>? onTap}) => MaterialApp(
-      home: Scaffold(
-        bottomNavigationBar: PlanthorBottomNav(
-          currentIndex: index,
-          onTap: onTap ?? (_) {},
-        ),
-      ),
-    );
+  home: Scaffold(
+    bottomNavigationBar: PlanthorBottomNav(
+      currentIndex: index,
+      onTap: onTap ?? (_) {},
+    ),
+  ),
+);
 
 void main() {
   group('PlanthorBottomNav', () {
@@ -25,7 +25,9 @@ void main() {
       expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('calls onTap with correct index when Plans tapped', (tester) async {
+    testWidgets('calls onTap with correct index when Plans tapped', (
+      tester,
+    ) async {
       int? tappedIndex;
       await tester.pumpWidget(_wrap(index: 0, onTap: (i) => tappedIndex = i));
       await tester.tap(find.text('Plans'));
@@ -47,6 +49,30 @@ void main() {
     testWidgets('active tab 2 renders correctly', (tester) async {
       await tester.pumpWidget(_wrap(index: 2));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('uses fixed 90px Figma height', (tester) async {
+      await tester.pumpWidget(_wrap(index: 0));
+
+      expect(tester.getSize(find.byType(PlanthorBottomNav)).height, 90);
+    });
+
+    testWidgets('exposes selected destination semantics', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(_wrap(index: 1));
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Plans')),
+        matchesSemantics(
+          label: 'Plans',
+          isButton: true,
+          hasSelectedState: true,
+          isSelected: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
     });
   });
 }

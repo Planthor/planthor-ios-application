@@ -44,6 +44,15 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     }
   }
 
+  String? _resolveAvatarUrl(AuthToken? token) {
+    if (token == null) return null;
+    try {
+      return decodeJwtPayload(token.accessToken)['avatarUrl'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<AuthToken?>>(authProvider, (prev, next) {
@@ -56,7 +65,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                backgroundColor: AppColors.forestGreen,
+                backgroundColor: AppColors.brandDark,
                 content: Text(
                   'Welcome, $name!',
                   style: const TextStyle(color: Colors.white),
@@ -74,9 +83,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     final location = GoRouterState.of(context).matchedLocation;
     final selectedIndex = _indexFromLocation(location);
+    final avatarUrl = _resolveAvatarUrl(ref.watch(authProvider).valueOrNull);
 
     return Scaffold(
-      appBar: const PlanthorAppBar(),
+      appBar: PlanthorAppBar(
+        onProfileTap: () => context.go('/settings'),
+        avatarUrl: avatarUrl,
+      ),
       body: widget.child,
       bottomNavigationBar: PlanthorBottomNav(
         currentIndex: selectedIndex,
