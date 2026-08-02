@@ -93,5 +93,42 @@ void main() {
       await tester.pump();
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
+
+    testWidgets('shows Delete Account action', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      final deleteAccount = find.byKey(const Key('delete-account-row'));
+      await tester.scrollUntilVisible(
+        deleteAccount,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(deleteAccount, findsOneWidget);
+      expect(find.text('Delete Account'), findsOneWidget);
+    });
+
+    testWidgets('opens and cancels delete-account confirmation', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      final deleteAccount = find.byKey(const Key('delete-account-row'));
+      await tester.scrollUntilVisible(
+        deleteAccount,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(deleteAccount);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Yes, Delete My Account'), findsOneWidget);
+      expect(find.byKey(const Key('cancel-delete-account')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('cancel-delete-account')));
+      await tester.pumpAndSettle();
+      expect(find.text('Yes, Delete My Account'), findsNothing);
+    });
   });
 }

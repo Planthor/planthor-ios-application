@@ -112,7 +112,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 32),
 
-            // ── 6. Sign out ──
+            // ── 6. Account actions ──
             _SignOutButton(
               onTap: () => ref.read(authProvider.notifier).signOut(),
             ),

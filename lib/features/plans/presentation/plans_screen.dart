@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/connect_apps/providers/strava_connection_provider.dart';
+import 'package:planthor_ios_application/features/plans/bloc/mock_plan_changes_provider.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_card.dart';
 
@@ -14,12 +16,12 @@ class PlansScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isConnected =
         ref.watch(stravaConnectionProvider) == StravaConnectionStatus.connected;
-    final plansAsync = ref.watch(personalPlansProvider);
+    final plansAsync = ref.watch(effectivePersonalPlansProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.push('/plans/new'),
         tooltip: 'Create plan',
         child: const Icon(Icons.add, size: 24),
       ),
@@ -76,8 +78,13 @@ class PlansScreen extends ConsumerWidget {
                         itemCount: plans.length,
                         separatorBuilder: (_, _) =>
                             const SizedBox(height: AppSpacing.lg),
-                        itemBuilder: (_, index) =>
-                            PlanCard(plan: plans[index], onTap: () {}),
+                        itemBuilder: (_, index) => PlanCard(
+                          plan: plans[index],
+                          onTap: () => context.push(
+                            '/plans/${plans[index].id}',
+                            extra: plans[index],
+                          ),
+                        ),
                       ),
                     ),
                     SliverToBoxAdapter(

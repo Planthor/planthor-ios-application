@@ -7,12 +7,16 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.showBack = false,
     this.onBack,
+    this.onRefreshTap,
+    this.onNotificationTap,
     this.onProfileTap,
     this.avatarUrl,
   });
 
   final bool showBack;
   final VoidCallback? onBack;
+  final VoidCallback? onRefreshTap;
+  final VoidCallback? onNotificationTap;
   final VoidCallback? onProfileTap;
   final String? avatarUrl;
 
@@ -68,6 +72,29 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
 
                 const Spacer(),
+
+                if (onRefreshTap != null)
+                  IconButton(
+                    key: const Key('refresh-button'),
+                    onPressed: onRefreshTap,
+                    tooltip: 'Refresh',
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: AppColors.textSecondary,
+                      size: 24,
+                    ),
+                  ),
+
+                IconButton(
+                  key: const Key('notifications-button'),
+                  onPressed: onNotificationTap,
+                  tooltip: 'Notifications',
+                  icon: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: AppColors.textSecondary,
+                    size: 24,
+                  ),
+                ),
 
                 GestureDetector(
                   key: const Key('profile-avatar'),

@@ -17,6 +17,20 @@ void main() {
       expect(find.byKey(const Key('profile-avatar')), findsOneWidget);
     });
 
+    testWidgets('shows notifications button near profile avatar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap(const PlanthorAppBar()));
+      expect(find.byKey(const Key('notifications-button')), findsOneWidget);
+      expect(find.byIcon(Icons.notifications_none_rounded), findsOneWidget);
+    });
+
+    testWidgets('shows refresh button when callback provided', (tester) async {
+      await tester.pumpWidget(_wrap(const PlanthorAppBar(onRefreshTap: _noop)));
+      expect(find.byKey(const Key('refresh-button')), findsOneWidget);
+      expect(find.byIcon(Icons.refresh), findsOneWidget);
+    });
+
     testWidgets('no back button when showBack is false', (tester) async {
       await tester.pumpWidget(_wrap(const PlanthorAppBar()));
       expect(find.byIcon(Icons.arrow_back), findsNothing);
@@ -40,5 +54,18 @@ void main() {
       await tester.tap(find.byKey(const Key('profile-avatar')));
       expect(tapped, isTrue);
     });
+
+    testWidgets('onNotificationTap callback fires on button tap', (
+      tester,
+    ) async {
+      var tapped = false;
+      await tester.pumpWidget(
+        _wrap(PlanthorAppBar(onNotificationTap: () => tapped = true)),
+      );
+      await tester.tap(find.byKey(const Key('notifications-button')));
+      expect(tapped, isTrue);
+    });
   });
 }
+
+void _noop() {}

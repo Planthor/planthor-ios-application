@@ -83,10 +83,19 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     final location = GoRouterState.of(context).matchedLocation;
     final selectedIndex = _indexFromLocation(location);
+    final isNestedPlanRoute = location.startsWith('/plans/');
+    final isPlanDetails =
+        RegExp(r'^/plans/[^/]+$').hasMatch(location) &&
+        location != '/plans/new';
     final avatarUrl = _resolveAvatarUrl(ref.watch(authProvider).valueOrNull);
 
     return Scaffold(
       appBar: PlanthorAppBar(
+        showBack: isNestedPlanRoute,
+        onBack: isNestedPlanRoute ? () => context.go('/plans') : null,
+        onRefreshTap: isPlanDetails
+            ? () => ref.invalidate(personalPlansProvider)
+            : null,
         onProfileTap: () => context.go('/settings'),
         avatarUrl: avatarUrl,
       ),
