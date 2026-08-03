@@ -7,14 +7,12 @@ import 'package:planthor_ios_application/features/connect_apps/providers/strava_
 import '../helpers/fakes.dart';
 
 Widget _wrap(StravaConnectionStatus status) => ProviderScope(
-      overrides: [
-        ...authOverrides(),
-        stravaConnectionProvider.overrideWith(
-          () => _FakeStrava(status),
-        ),
-      ],
-      child: const MaterialApp(home: ConnectAppsScreen()),
-    );
+  overrides: [
+    ...authOverrides(),
+    stravaConnectionProvider.overrideWith(() => _FakeStrava(status)),
+  ],
+  child: const MaterialApp(home: ConnectAppsScreen()),
+);
 
 class _FakeStrava extends StravaConnection {
   _FakeStrava(this._status);

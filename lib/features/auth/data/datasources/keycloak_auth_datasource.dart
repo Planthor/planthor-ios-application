@@ -15,8 +15,8 @@ class KeycloakAuthDatasource {
   KeycloakAuthDatasource({
     FlutterAppAuth? appAuth,
     FlutterSecureStorage? storage,
-  })  : _appAuth = appAuth ?? const FlutterAppAuth(),
-        _storage = storage ?? const FlutterSecureStorage();
+  }) : _appAuth = appAuth ?? const FlutterAppAuth(),
+       _storage = storage ?? const FlutterSecureStorage();
 
   Future<AuthToken> signIn() async {
     final result = await _appAuth.authorizeAndExchangeCode(

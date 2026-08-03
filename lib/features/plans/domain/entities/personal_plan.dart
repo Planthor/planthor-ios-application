@@ -46,19 +46,20 @@ class PersonalPlan {
   bool get isComplete => progressRaw >= 1.0;
 
   factory PersonalPlan.fromJson(Map<String, dynamic> json) => PersonalPlan(
-        id: json['planId'] as String,
-        name: json['planName'] as String? ?? '(unnamed)',
-        unit: json['unit'] as String? ?? '',
-        target: (json['target'] as num?)?.toDouble() ?? 0,
-        current: (json['currentValue'] as num?)?.toDouble() ?? 0,
-        status: _parseStatus(json['status'] as String? ?? ''),
-        dateRange: _formatDateRange(
-          json['fromDate'] as String?,
-          json['toDate'] as String?,
-        ),
-      );
+    id: json['planId'] as String,
+    name: json['planName'] as String? ?? '(unnamed)',
+    unit: json['unit'] as String? ?? '',
+    target: (json['target'] as num?)?.toDouble() ?? 0,
+    current: (json['currentValue'] as num?)?.toDouble() ?? 0,
+    status: _parseStatus(json['status'] as String? ?? ''),
+    dateRange: _formatDateRange(
+      json['fromDate'] as String?,
+      json['toDate'] as String?,
+    ),
+  );
 
-  static PlanStatus _parseStatus(String status) => switch (status.toLowerCase()) {
+  static PlanStatus _parseStatus(String status) =>
+      switch (status.toLowerCase()) {
         'completed' => PlanStatus.completed,
         'overdue' => PlanStatus.overdue,
         'upcoming' => PlanStatus.upcoming,
@@ -70,13 +71,23 @@ class PersonalPlan {
     final f = DateTime.tryParse(from);
     final t = DateTime.tryParse(to);
     if (f == null || t == null) return '';
-    String fmt(DateTime d) =>
-        '${_month(d.month)} ${d.day}, ${d.year}';
+    String fmt(DateTime d) => '${_month(d.month)} ${d.day}, ${d.year}';
     return '${fmt(f)} – ${fmt(t)}';
   }
 
   static String _month(int m) => const [
-        '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ][m];
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ][m];
 }

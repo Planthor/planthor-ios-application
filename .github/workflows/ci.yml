@@ -1,32 +1,274 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches:
+      - develop
+      - staging
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  push:
+    branches:
+      - develop
+      - staging
+      - main
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "integration_test/**"
+      - "android/**"
+      - "ios/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+      - ".github/workflows/**"
+      - "scripts/ci/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment label for a manual Android artifact
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - staging
+          - production
+      build_android:
+        description: Build and upload a debug Android APK
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FLUTTER_VERSION: "3.44.1"
+  JAVA_VERSION: "17"
+  COVERAGE_MODE: report-only
+  MIN_COVERAGE: "70"
 
 jobs:
-  test:
+  quality:
+    name: Quality gate
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    outputs:
+      run_platform_checks: ${{ steps.scope.outputs.run_quality }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
+      - name: Check out repository
+        uses: actions/checkout@v4
         with:
-          flutter-version: '3.44.1'
-          channel: 'stable'
+          fetch-depth: 0
+
+      - name: Detect whether Flutter checks are required
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            run_quality="true"
+            reason="manual workflow run"
+          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            changed_files="$(git diff --name-only "${BASE_SHA}" "${GITHUB_SHA}")"
+            if grep -Eq '^(lib|test|integration_test|android|ios|assets|scripts/ci)/|^(pubspec\.yaml|pubspec\.lock|analysis_options\.yaml)$|^\.github/workflows/' <<< "${changed_files}"; then
+              run_quality="true"
+              reason="Flutter-impacting files changed"
+            else
+              run_quality="false"
+              reason="no Flutter-impacting files changed"
+            fi
+          else
+            run_quality="false"
+            reason="protected-branch push relies on the required PR quality gate"
+          fi
+          echo "run_quality=${run_quality}" >> "$GITHUB_OUTPUT"
+          echo "reason=${reason}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        if: steps.scope.outputs.run_quality == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter
+        if: steps.scope.outputs.run_quality == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        if: steps.scope.outputs.run_quality == 'true'
+        run: flutter pub get
+
+      - name: Run quality checks
+        if: steps.scope.outputs.run_quality == 'true'
+        run: scripts/ci/quality_checks.sh
+
+      - name: Upload coverage report
+        if: ${{ always() && steps.scope.outputs.run_quality == 'true' && hashFiles('coverage/lcov.info') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Summarize quality result
+        if: always()
+        run: |
+          {
+            echo "## Flutter quality gate"
+            echo ""
+            echo "Result: **${{ job.status }}**"
+            echo "Execution: **${{ steps.scope.outputs.reason }}**"
+            echo "Coverage policy: **${COVERAGE_MODE}** (threshold ${MIN_COVERAGE}%)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  android-build:
+    name: Android build verification
+    needs: quality
+    if: >-
+      (github.event_name == 'pull_request' && needs.quality.outputs.run_platform_checks == 'true') ||
+      (github.event_name == 'push' && github.ref_name != 'main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.build_android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run code generation
-        run: dart run build_runner build --delete-conflicting-outputs
+      - name: Select artifact metadata
+        id: metadata
+        if: github.event_name != 'pull_request'
+        env:
+          MANUAL_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            environment="${MANUAL_ENVIRONMENT}"
+          elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
+            environment="staging"
+          else
+            environment="dev"
+          fi
+          short_sha="${GITHUB_SHA:0:7}"
+          artifact_file="flutter-android-${environment}-${short_sha}.apk"
+          echo "environment=${environment}" >> "$GITHUB_OUTPUT"
+          echo "artifact_file=${artifact_file}" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=${artifact_file%.apk}" >> "$GITHUB_OUTPUT"
 
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos
+      - name: Build debug APK
+        run: flutter build apk --debug --no-pub
 
-      - name: Run tests
-        run: flutter test
+      - name: Name and checksum artifact
+        if: github.event_name != 'pull_request'
+        env:
+          ARTIFACT_FILE: ${{ steps.metadata.outputs.artifact_file }}
+        run: |
+          artifact_dir="build/app/outputs/flutter-apk"
+          mv "${artifact_dir}/app-debug.apk" "${artifact_dir}/${ARTIFACT_FILE}"
+          sha256sum "${artifact_dir}/${ARTIFACT_FILE}" | tee "${artifact_dir}/${ARTIFACT_FILE}.sha256"
+
+      - name: Upload Android artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}
+          path: |
+            build/app/outputs/flutter-apk/${{ steps.metadata.outputs.artifact_file }}
+            build/app/outputs/flutter-apk/${{ steps.metadata.outputs.artifact_file }}.sha256
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Summarize Android artifact
+        if: github.event_name != 'pull_request'
+        env:
+          ARTIFACT_FILE: ${{ steps.metadata.outputs.artifact_file }}
+          ENVIRONMENT: ${{ steps.metadata.outputs.environment }}
+        run: |
+          checksum="$(cut -d ' ' -f 1 "build/app/outputs/flutter-apk/${ARTIFACT_FILE}.sha256")"
+          {
+            echo "## Android build verification"
+            echo ""
+            echo "- Environment: \`${ENVIRONMENT}\`"
+            echo "- Artifact: \`${ARTIFACT_FILE}\`"
+            echo "- SHA-256: \`${checksum}\`"
+            echo "- External deployment performed: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summarize pull request verification
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## Android pull request verification"
+            echo ""
+            echo "- Build: debug APK"
+            echo "- Result: **compiled successfully**"
+            echo "- Artifact uploaded: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ios-build:
+    name: iOS build verification
+    needs: quality
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.quality.outputs.run_platform_checks == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build unsigned iOS app
+        run: flutter build ios --debug --no-codesign --no-pub
+
+      - name: Summarize iOS verification
+        run: |
+          {
+            echo "## iOS pull request verification"
+            echo ""
+            echo "- Build: unsigned debug device app"
+            echo "- Result: **compiled successfully**"
+            echo "- Artifact uploaded: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"

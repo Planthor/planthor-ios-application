@@ -50,8 +50,10 @@ class DiscoveryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.planChip,
                   borderRadius: BorderRadius.circular(12),

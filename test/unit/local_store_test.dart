@@ -94,10 +94,7 @@ void main() {
     });
 
     test('set unsupported type throws ArgumentError', () async {
-      expect(
-        () => store.set<List<int>>('k', [1, 2]),
-        throwsArgumentError,
-      );
+      expect(() => store.set<List<int>>('k', [1, 2]), throwsArgumentError);
     });
   });
 }

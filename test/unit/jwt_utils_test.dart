@@ -29,13 +29,17 @@ void main() {
     });
 
     test('throws FormatException for non-JWT string', () {
-      expect(() => decodeJwtPayload('not.a.valid.jwt.string'),
-          throwsA(isA<FormatException>()));
+      expect(
+        () => decodeJwtPayload('not.a.valid.jwt.string'),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('throws FormatException when parts != 3', () {
-      expect(() => decodeJwtPayload('only.twoparts'),
-          throwsA(isA<FormatException>()));
+      expect(
+        () => decodeJwtPayload('only.twoparts'),
+        throwsA(isA<FormatException>()),
+      );
     });
   });
 }

@@ -6,9 +6,9 @@ import 'package:planthor_ios_application/features/auth/presentation/sign_in_scre
 import '../helpers/fakes.dart';
 
 Widget _wrapUnauthenticated() => ProviderScope(
-      overrides: unauthOverrides(),
-      child: const MaterialApp(home: SignInScreen()),
-    );
+  overrides: unauthOverrides(),
+  child: const MaterialApp(home: SignInScreen()),
+);
 
 void main() {
   group('SignInScreen', () {

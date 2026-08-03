@@ -30,8 +30,10 @@ abstract final class AppConfig {
   // ── Resource API ──────────────────────────────────────────────────────
   // Override host via: --dart-define=API_HOST=10.0.2.2 (Android emulator)
   // or --dart-define=API_HOST=<LAN IP> (physical device)
-  static const _apiHost =
-      String.fromEnvironment('API_HOST', defaultValue: 'localhost');
+  static const _apiHost = String.fromEnvironment(
+    'API_HOST',
+    defaultValue: 'localhost',
+  );
   static String get _apiDev => 'https://$_apiHost:7259';
   static const _apiProd = 'https://api.planthor.space';
   static String get apiBase => isProduction ? _apiProd : _apiDev;

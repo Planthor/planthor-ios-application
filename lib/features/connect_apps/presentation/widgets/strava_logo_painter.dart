@@ -52,11 +52,7 @@ class StravaLogoPainter extends CustomPainter {
 
 /// Convenience widget wrapping the Strava logo painter.
 class StravaLogo extends StatelessWidget {
-  const StravaLogo({
-    super.key,
-    this.size = 32,
-    this.color = Colors.white,
-  });
+  const StravaLogo({super.key, this.size = 32, this.color = Colors.white});
 
   final double size;
   final Color color;

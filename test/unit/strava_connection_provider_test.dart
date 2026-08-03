@@ -21,24 +21,32 @@ void main() {
       );
     });
 
-    test('connect transitions to connected after delay', () async {
-      container.listen(stravaConnectionProvider, (_, _) {});
-      await container.read(stravaConnectionProvider.notifier).connect();
-      expect(
-        container.read(stravaConnectionProvider),
-        StravaConnectionStatus.connected,
-      );
-    }, timeout: const Timeout(Duration(seconds: 10)));
+    test(
+      'connect transitions to connected after delay',
+      () async {
+        container.listen(stravaConnectionProvider, (_, _) {});
+        await container.read(stravaConnectionProvider.notifier).connect();
+        expect(
+          container.read(stravaConnectionProvider),
+          StravaConnectionStatus.connected,
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    test('disconnect resets to disconnected', () async {
-      container.listen(stravaConnectionProvider, (_, _) {});
-      await container.read(stravaConnectionProvider.notifier).connect();
-      await container.read(stravaConnectionProvider.notifier).disconnect();
-      expect(
-        container.read(stravaConnectionProvider),
-        StravaConnectionStatus.disconnected,
-      );
-    }, timeout: const Timeout(Duration(seconds: 10)));
+    test(
+      'disconnect resets to disconnected',
+      () async {
+        container.listen(stravaConnectionProvider, (_, _) {});
+        await container.read(stravaConnectionProvider.notifier).connect();
+        await container.read(stravaConnectionProvider.notifier).disconnect();
+        expect(
+          container.read(stravaConnectionProvider),
+          StravaConnectionStatus.disconnected,
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 
   group('StravaConnectionStatus enum', () {
