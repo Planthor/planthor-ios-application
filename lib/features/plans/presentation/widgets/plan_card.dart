@@ -30,137 +30,148 @@ class PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final status = _isOverdue
+        ? 'missed deadline'
+        : '${plan.progressPercent} percent achieved';
+
+    return Semantics(
+      button: onTap != null,
+      label: '${plan.name}, $status',
+      excludeSemantics: true,
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderSubtle, width: 1),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 20,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Top row: title + date + Details button ──
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          plan.name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMain,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          plan.dateRange,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  _DetailsButton(onTap: onTap),
-                ],
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderSubtle, width: 1),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A191C1E),
+                blurRadius: 20,
+                offset: Offset(0, 20),
               ),
-
-              const SizedBox(height: 10),
-
-              // ── Bottom row: metric + status (left) | ring (right) ──
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              _fmt(plan.current),
-                              style: GoogleFonts.inter(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                color: _isOverdue
-                                    ? AppColors.planOverdue
-                                    : AppColors.textMain,
-                                height: 1.0,
-                                letterSpacing: -0.5,
-                              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Top row: title + date + Details button ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            plan.name,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textMain,
+                              height: 1.4,
                             ),
-                            const SizedBox(width: 6),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: Text(
-                                '/ ${_fmt(plan.target)} ${plan.unit}',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textMuted,
-                                  height: 1.2,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            plan.dateRange,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textMuted,
+                              height: 1.33,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _DetailsButton(onTap: onTap),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // ── Bottom row: metric + status (left) | ring (right) ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _fmt(plan.current),
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700,
+                                  color: _isOverdue
+                                      ? AppColors.planOverdue
+                                      : AppColors.textMain,
+                                  height: 1.0,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
-                            ),
-                            if (_isComplete) ...[
                               const SizedBox(width: 6),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
-                                child: Icon(
-                                  Icons.check_circle,
-                                  size: 18,
-                                  color: AppColors.achievementGreen,
+                                child: Text(
+                                  '/ ${_fmt(plan.target)} ${plan.unit}',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textMuted,
+                                    height: 1.2,
+                                  ),
                                 ),
                               ),
+                              if (_isComplete) ...[
+                                const SizedBox(width: 6),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    size: 18,
+                                    color: AppColors.achievementGreen,
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        if (_isOverdue)
-                          _StatusLabel(
-                            text: 'MISSED DEADLINE',
-                            color: AppColors.planOverdue,
-                          )
-                        else
-                          _StatusLabel(
-                            text: '${plan.progressPercent}% ACHIEVED',
-                            color: _accentColor,
                           ),
-                      ],
+                          const SizedBox(height: 4),
+                          if (_isOverdue)
+                            _StatusLabel(
+                              text: 'MISSED DEADLINE',
+                              color: AppColors.planOverdue,
+                            )
+                          else
+                            _StatusLabel(
+                              text: '${plan.progressPercent}% ACHIEVED',
+                              color: _accentColor,
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  PlanProgressRing(
-                    progress: plan.progress,
-                    icon: plan.icon,
-                    size: 64,
-                    isOverdue: _isOverdue,
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 12),
+                    PlanProgressRing(
+                      progress: plan.progress,
+                      icon: plan.icon,
+                      size: 80,
+                      isOverdue: _isOverdue,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -182,6 +193,8 @@ class _DetailsButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        constraints: const BoxConstraints(minWidth: 64, minHeight: 44),
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLow,
@@ -189,8 +202,8 @@ class _DetailsButton extends StatelessWidget {
         ),
         child: Text(
           'Details',
-          style: GoogleFonts.inter(
-            fontSize: 13,
+          style: GoogleFonts.montserrat(
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.textMain,
           ),
@@ -209,7 +222,7 @@ class _StatusLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.montserrat(
         fontSize: 12,
         fontWeight: FontWeight.w700,
         color: color,

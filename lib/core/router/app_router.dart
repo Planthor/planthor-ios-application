@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/account_deleted_screen.dart';
 import 'package:planthor_ios_application/features/auth/presentation/sign_in_screen.dart';
 import 'package:planthor_ios_application/features/auth/presentation/profile_screen.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/main_scaffold.dart';
+import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
+import 'package:planthor_ios_application/features/plans/presentation/plan_details_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/plan_form_screen.dart';
 import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
 import 'package:planthor_ios_application/features/plant_discovery/presentation/discovery_screen.dart';
 
@@ -38,29 +42,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(path: '/', builder: (_, _) => const _SplashScreen()),
+      GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
       GoRoute(
-        path: '/',
-        builder: (_, _) => const _SplashScreen(),
-      ),
-      GoRoute(
-        path: '/sign-in',
-        builder: (_, _) => const SignInScreen(),
+        path: '/account-deleted',
+        builder: (_, _) => const AccountDeletedScreen(),
       ),
       ShellRoute(
         builder: (context, _, child) => MainScaffold(child: child),
         routes: [
+          GoRoute(path: '/home', builder: (_, _) => const DiscoveryScreen()),
+          GoRoute(path: '/plans', builder: (_, _) => const PlansScreen()),
           GoRoute(
-            path: '/home',
-            builder: (_, _) => const DiscoveryScreen(),
+            path: '/plans/new',
+            builder: (_, _) => const PlanFormScreen(),
           ),
           GoRoute(
-            path: '/plans',
-            builder: (_, _) => const PlansScreen(),
+            path: '/plans/:planId/edit',
+            builder: (_, state) => PlanFormScreen(
+              plan: state.extra is PersonalPlan
+                  ? state.extra! as PersonalPlan
+                  : null,
+            ),
           ),
           GoRoute(
-            path: '/settings',
-            builder: (_, _) => const ProfileScreen(),
+            path: '/plans/:planId',
+            builder: (_, state) => PlanDetailsScreen(
+              plan: state.extra is PersonalPlan
+                  ? state.extra! as PersonalPlan
+                  : null,
+            ),
           ),
+          GoRoute(path: '/settings', builder: (_, _) => const ProfileScreen()),
         ],
       ),
     ],
@@ -72,8 +85,6 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
 
@@ -11,42 +12,47 @@ class SignInScreen extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         error: (error, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign in failed: $error')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Sign in failed: $error')));
         },
       );
     });
 
-    final isLoading = ref.watch(
-      authProvider.select((s) => s.isLoading),
-    );
+    final isLoading = ref.watch(authProvider.select((s) => s.isLoading));
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
+    final theme = Theme.of(context);
+
+    return Theme(
+      data: theme.copyWith(
+        textTheme: GoogleFonts.interTextTheme(theme.textTheme),
+      ),
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 48.0,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 384),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildCard(isLoading, ref),
-                    const SizedBox(height: 40),
-                    _buildFooter(),
-                  ],
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 48.0,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 384),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildCard(isLoading, ref),
+                      const SizedBox(height: 40),
+                      _buildFooter(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -135,8 +141,9 @@ class SignInScreen extends ConsumerWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed:
-            isLoading ? null : () => ref.read(authProvider.notifier).signIn(),
+        onPressed: isLoading
+            ? null
+            : () => ref.read(authProvider.notifier).signIn(),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.facebookBlue,
           foregroundColor: Colors.white,
@@ -158,10 +165,7 @@ class SignInScreen extends ConsumerWidget {
             : const Icon(Icons.facebook, size: 24),
         label: Text(
           isLoading ? 'Signing in…' : 'Sign in with Facebook',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );

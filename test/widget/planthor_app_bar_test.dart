@@ -12,9 +12,23 @@ void main() {
       expect(find.text('Planthor'), findsOneWidget);
     });
 
-    testWidgets('shows notification bell by default', (tester) async {
+    testWidgets('shows profile avatar by default', (tester) async {
       await tester.pumpWidget(_wrap(const PlanthorAppBar()));
-      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+      expect(find.byKey(const Key('profile-avatar')), findsOneWidget);
+    });
+
+    testWidgets('shows notifications button near profile avatar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap(const PlanthorAppBar()));
+      expect(find.byKey(const Key('notifications-button')), findsOneWidget);
+      expect(find.byIcon(Icons.notifications_none_rounded), findsOneWidget);
+    });
+
+    testWidgets('shows refresh button when callback provided', (tester) async {
+      await tester.pumpWidget(_wrap(const PlanthorAppBar(onRefreshTap: _noop)));
+      expect(find.byKey(const Key('refresh-button')), findsOneWidget);
+      expect(find.byIcon(Icons.refresh), findsOneWidget);
     });
 
     testWidgets('no back button when showBack is false', (tester) async {
@@ -27,18 +41,31 @@ void main() {
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
-    testWidgets('preferredSize height is 64', (tester) async {
+    testWidgets('preferredSize height is 75', (tester) async {
       const bar = PlanthorAppBar();
-      expect(bar.preferredSize.height, 64);
+      expect(bar.preferredSize.height, 75);
     });
 
-    testWidgets('onNotification callback fires on bell tap', (tester) async {
+    testWidgets('onProfileTap callback fires on avatar tap', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        _wrap(PlanthorAppBar(onNotification: () => tapped = true)),
+        _wrap(PlanthorAppBar(onProfileTap: () => tapped = true)),
       );
-      await tester.tap(find.byIcon(Icons.notifications_outlined));
+      await tester.tap(find.byKey(const Key('profile-avatar')));
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('onNotificationTap callback fires on button tap', (
+      tester,
+    ) async {
+      var tapped = false;
+      await tester.pumpWidget(
+        _wrap(PlanthorAppBar(onNotificationTap: () => tapped = true)),
+      );
+      await tester.tap(find.byKey(const Key('notifications-button')));
       expect(tapped, isTrue);
     });
   });
 }
+
+void _noop() {}

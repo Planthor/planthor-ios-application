@@ -7,15 +7,19 @@ abstract final class AppSpacing {
   // Fixed tokens — use these for internal component spacing.
   static const double xs = 4;
   static const double sm = 8;
+  static const double smMd = 12;
   static const double md = 16;
+  static const double mdLg = 20;
   static const double lg = 24;
   static const double xl = 32;
+  static const double xlLg = 40;
   static const double xxl = 48;
+  static const double xxxl = 56;
 
   /// Outer page margin, adapts to window class.
   static double pageMargin(BuildContext context) =>
       switch (context.windowClass) {
-        WindowClass.compact => 16,
+        WindowClass.compact => 24,
         WindowClass.medium => 24,
         WindowClass.expanded => 24,
       };

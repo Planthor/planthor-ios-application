@@ -36,37 +36,44 @@ class PlanthorBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.paddingOf(
+      context,
+    ).bottom.clamp(0.0, 32.0).toDouble();
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceCard,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderSubtle,
-            width: 1,
+    return SizedBox(
+      height: 90,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceCard,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x08000000),
+              blurRadius: 10,
+              offset: Offset(0, -4),
+            ),
+          ],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
           ),
         ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      padding: EdgeInsets.only(bottom: bottomPadding),
-      child: SizedBox(
-        height: 64,
+        padding: EdgeInsets.only(bottom: bottomPadding),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(_items.length, (index) {
             final item = _items[index];
             final isActive = index == currentIndex;
 
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onTap(index),
-              child: _NavItem(
-                item: item,
-                isActive: isActive,
+            return Semantics(
+              button: true,
+              selected: isActive,
+              label: item.label,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onTap(index),
+                child: ExcludeSemantics(
+                  child: _NavItem(item: item, isActive: isActive),
+                ),
               ),
             );
           }),
@@ -89,10 +96,7 @@ class _NavItemData {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.item,
-    required this.isActive,
-  });
+  const _NavItem({required this.item, required this.isActive});
 
   final _NavItemData item;
   final bool isActive;
@@ -104,7 +108,7 @@ class _NavItem extends StatelessWidget {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.primaryContainer,
           borderRadius: BorderRadius.circular(99),
@@ -112,18 +116,14 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              item.activeIcon,
-              size: 22,
-              color: AppColors.onPrimaryContainer,
-            ),
+            Icon(item.activeIcon, size: 22, color: AppColors.brandHeader),
             const SizedBox(height: 2),
             Text(
               item.label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.onPrimaryContainer,
+                color: AppColors.brandHeader,
               ),
             ),
           ],
@@ -137,18 +137,14 @@ class _NavItem extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            item.icon,
-            size: 22,
-            color: AppColors.textMuted,
-          ),
+          Icon(item.icon, size: 22, color: AppColors.inactive),
           const SizedBox(height: 2),
           Text(
             item.label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.textMuted,
+              color: AppColors.inactive,
             ),
           ),
         ],

@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_card.dart';
 
-Widget _wrap(Widget w) => MaterialApp(home: Scaffold(body: SingleChildScrollView(child: w)));
+Widget _wrap(Widget w) => MaterialApp(
+  home: Scaffold(body: SingleChildScrollView(child: w)),
+);
 
 const _activePlan = PersonalPlan(
   id: '1',
@@ -76,7 +78,12 @@ void main() {
     });
 
     testWidgets('renders plan without description', (tester) async {
-      const plan = PersonalPlan(id: '4', name: 'No Desc', target: 10, current: 5);
+      const plan = PersonalPlan(
+        id: '4',
+        name: 'No Desc',
+        target: 10,
+        current: 5,
+      );
       await tester.pumpWidget(_wrap(const PlanCard(plan: plan)));
       expect(tester.takeException(), isNull);
     });
@@ -84,6 +91,24 @@ void main() {
     testWidgets('renders progress percentage text', (tester) async {
       await tester.pumpWidget(_wrap(const PlanCard(plan: _activePlan)));
       expect(find.textContaining('%'), findsWidgets);
+    });
+
+    testWidgets('exposes one descriptive tap semantic', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(_wrap(PlanCard(plan: _activePlan, onTap: () {})));
+
+      expect(
+        tester.getSemantics(
+          find.bySemanticsLabel('Run 100km, 40 percent achieved'),
+        ),
+        matchesSemantics(
+          label: 'Run 100km, 40 percent achieved',
+          isButton: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
     });
   });
 }

@@ -7,15 +7,21 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.showBack = false,
     this.onBack,
-    this.onNotification,
+    this.onRefreshTap,
+    this.onNotificationTap,
+    this.onProfileTap,
+    this.avatarUrl,
   });
 
   final bool showBack;
   final VoidCallback? onBack;
-  final VoidCallback? onNotification;
+  final VoidCallback? onRefreshTap;
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onProfileTap;
+  final String? avatarUrl;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(75);
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +29,15 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
       decoration: const BoxDecoration(
         color: AppColors.surfaceCard,
         border: Border(
-          bottom: BorderSide(
-            color: AppColors.borderSubtle,
-            width: 1,
-          ),
+          bottom: BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: SizedBox(
-          height: 64,
+          height: 75,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
                 // ── Back button or brand ──
@@ -60,25 +63,56 @@ class PlanthorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 // ── Brand name ──
                 Text(
                   'Planthor',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.montserrat(
                     fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.planthorBlue,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.brandHeader,
                     letterSpacing: -0.3,
                   ),
                 ),
 
                 const Spacer(),
 
-                // ── Notification bell ──
-                GestureDetector(
-                  onTap: onNotification ?? () {},
-                  child: const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.notifications_outlined,
-                      color: AppColors.textMuted,
+                if (onRefreshTap != null)
+                  IconButton(
+                    key: const Key('refresh-button'),
+                    onPressed: onRefreshTap,
+                    tooltip: 'Refresh',
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: AppColors.textSecondary,
                       size: 24,
+                    ),
+                  ),
+
+                IconButton(
+                  key: const Key('notifications-button'),
+                  onPressed: onNotificationTap,
+                  tooltip: 'Notifications',
+                  icon: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: AppColors.textSecondary,
+                    size: 24,
+                  ),
+                ),
+
+                GestureDetector(
+                  key: const Key('profile-avatar'),
+                  onTap: onProfileTap,
+                  child: Semantics(
+                    button: true,
+                    label: 'Open profile',
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppColors.metricSurface,
+                      foregroundImage: avatarUrl == null || avatarUrl!.isEmpty
+                          ? null
+                          : NetworkImage(avatarUrl!),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.inactive,
+                        size: 22,
+                      ),
                     ),
                   ),
                 ),

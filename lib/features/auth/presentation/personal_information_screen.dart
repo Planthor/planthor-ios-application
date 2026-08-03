@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
@@ -7,6 +8,7 @@ import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/member.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
+import 'package:planthor_ios_application/features/auth/presentation/widgets/delete_account_dialog.dart';
 
 class PersonalInformationScreen extends ConsumerStatefulWidget {
   const PersonalInformationScreen({super.key});
@@ -94,6 +96,17 @@ class _PersonalInformationScreenState
     );
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (_) => const DeleteAccountDialog(),
+    );
+    if (confirmed == true && mounted) {
+      context.go('/account-deleted');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<Member?>>(memberProfileProvider, (_, next) {
@@ -161,6 +174,8 @@ class _PersonalInformationScreenState
             ),
             const SizedBox(height: 32),
             _buildFormCard(),
+            const SizedBox(height: 32),
+            _DeleteAccountAction(onTap: _confirmDeleteAccount),
           ],
         ),
       ),
@@ -276,6 +291,65 @@ class _PersonalInformationScreenState
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DeleteAccountAction extends StatelessWidget {
+  const _DeleteAccountAction({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Delete Account',
+      child: Material(
+        color: AppColors.surfaceCard,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          key: const Key('delete-account-row'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.errorContainerLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: AppColors.destructive,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    'Delete Account',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.destructive,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: AppColors.destructive,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
