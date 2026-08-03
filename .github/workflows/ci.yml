@@ -64,6 +64,8 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      run_platform_checks: ${{ steps.scope.outputs.run_quality }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -141,6 +143,7 @@ jobs:
     name: Android build verification
     needs: quality
     if: >-
+      (github.event_name == 'pull_request' && needs.quality.outputs.run_platform_checks == 'true') ||
       (github.event_name == 'push' && github.ref_name != 'main') ||
       (github.event_name == 'workflow_dispatch' && inputs.build_android)
     runs-on: ubuntu-latest
@@ -168,6 +171,7 @@ jobs:
 
       - name: Select artifact metadata
         id: metadata
+        if: github.event_name != 'pull_request'
         env:
           MANUAL_ENVIRONMENT: ${{ inputs.environment }}
         run: |
@@ -188,6 +192,7 @@ jobs:
         run: flutter build apk --debug --no-pub
 
       - name: Name and checksum artifact
+        if: github.event_name != 'pull_request'
         env:
           ARTIFACT_FILE: ${{ steps.metadata.outputs.artifact_file }}
         run: |
@@ -196,6 +201,7 @@ jobs:
           sha256sum "${artifact_dir}/${ARTIFACT_FILE}" | tee "${artifact_dir}/${ARTIFACT_FILE}.sha256"
 
       - name: Upload Android artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.metadata.outputs.artifact_name }}
@@ -206,6 +212,7 @@ jobs:
           retention-days: 3
 
       - name: Summarize Android artifact
+        if: github.event_name != 'pull_request'
         env:
           ARTIFACT_FILE: ${{ steps.metadata.outputs.artifact_file }}
           ENVIRONMENT: ${{ steps.metadata.outputs.environment }}
@@ -218,4 +225,50 @@ jobs:
             echo "- Artifact: \`${ARTIFACT_FILE}\`"
             echo "- SHA-256: \`${checksum}\`"
             echo "- External deployment performed: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summarize pull request verification
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## Android pull request verification"
+            echo ""
+            echo "- Build: debug APK"
+            echo "- Result: **compiled successfully**"
+            echo "- Artifact uploaded: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ios-build:
+    name: iOS build verification
+    needs: quality
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.quality.outputs.run_platform_checks == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build unsigned iOS app
+        run: flutter build ios --debug --no-codesign --no-pub
+
+      - name: Summarize iOS verification
+        run: |
+          {
+            echo "## iOS pull request verification"
+            echo ""
+            echo "- Build: unsigned debug device app"
+            echo "- Result: **compiled successfully**"
+            echo "- Artifact uploaded: **no**"
           } >> "$GITHUB_STEP_SUMMARY"

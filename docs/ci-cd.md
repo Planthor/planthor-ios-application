@@ -1,6 +1,6 @@
 # CI/CD Operations
 
-Planthor uses GitHub Actions for Flutter quality checks, Android build verification, and a safe mock deployment flow. The initial setup uses Ubuntu runners only and does not contact Firebase, app stores, Apple services, or Sentry.
+Planthor uses GitHub Actions for Flutter quality checks, Android and iOS pull-request build verification, Android artifact verification, and a safe mock deployment flow. Quality and Android jobs use Ubuntu runners; unsigned iOS checks use GitHub-hosted macOS runners. The workflows do not contact Firebase, app stores, Apple services, or Sentry.
 
 ## Pinned toolchain and branch mapping
 
@@ -9,12 +9,13 @@ Planthor uses GitHub Actions for Flutter quality checks, Android build verificat
 - Production branch: `main` (the repository default branch).
 - Future integration branches: `develop` and `staging`.
 - Android target: the default `lib/main.dart` entrypoint with no product flavor.
+- iOS target: an unsigned debug device build using the default Runner scheme.
 - Validation artifact: debug APK, retained for 3 days.
 - Coverage: report-only with a visible 70% candidate threshold.
 
 The `quality` job reports a result for every targeted pull request so branch protection is never left waiting on a path-filtered workflow. Draft pull requests do not run until marked ready for review. A newer commit cancels an older in-progress pull-request run. Documentation-only changes outside CI configuration take a lightweight path without installing Flutter or running tests. Protected-branch pushes rely on the required pull-request quality gate, avoiding a duplicate full test run.
 
-Android verification runs after quality succeeds for pushes to `develop` and `staging`, or when manually requested. A `main`/production Android build is manual-only until real signing and deployment are introduced.
+For Flutter-impacting pull requests, Android verification compiles a debug APK on Ubuntu and iOS verification compiles an unsigned debug device app on macOS after quality succeeds. PR platform builds do not upload artifacts. Android verification also runs for pushes to `develop` and `staging`, or when manually requested; those runs upload the short-lived APK and checksum. A `main`/production Android build is manual-only until real signing and deployment are introduced.
 
 ## Run the checks locally
 
@@ -68,7 +69,7 @@ Remove the generated `release-manifest.json` after local validation; it is ignor
 
 After the workflow passes on GitHub, protect `main` and any active `develop`/`staging` branches:
 
-1. Require pull requests and the **Quality gate** status check.
+1. Require pull requests plus the **Quality gate**, **Android build verification**, and **iOS build verification** status checks.
 2. Block force pushes and branch deletion.
 3. Restrict direct pushes where the repository plan permits it.
 4. Keep Actions permissions read-only by default and allow only required actions.
@@ -82,6 +83,7 @@ GitHub branch protection and spending controls are repository settings and canno
 - Analyzer failure: run `flutter analyze --fatal-infos --fatal-warnings` with Flutter 3.44.1.
 - Test or coverage failure: run `flutter test --no-pub --coverage`, then inspect `coverage/lcov.info`.
 - Android failure: confirm Java 17 is active and run `flutter build apk --debug --no-pub`.
+- iOS failure: use macOS with Xcode and CocoaPods installed, then run `flutter build ios --debug --no-codesign --no-pub`.
 - Missing manifest: rerun `scripts/ci/mock_deploy.sh` with every required argument.
 - Production mock rejected: provide the exact confirmation `MOCK-PRODUCTION`.
 
