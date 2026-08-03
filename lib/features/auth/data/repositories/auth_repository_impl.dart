@@ -6,7 +6,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final KeycloakAuthDatasource _datasource;
 
   AuthRepositoryImpl({KeycloakAuthDatasource? datasource})
-      : _datasource = datasource ?? KeycloakAuthDatasource();
+    : _datasource = datasource ?? KeycloakAuthDatasource();
 
   @override
   Future<AuthToken> signIn() => _datasource.signIn();

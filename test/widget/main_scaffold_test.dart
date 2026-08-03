@@ -6,10 +6,7 @@ import 'package:planthor_ios_application/features/navigation/presentation/main_s
 
 import '../helpers/fakes.dart';
 
-GoRouter _makeRouter(
-  Widget child, {
-  String initialLocation = '/home',
-}) =>
+GoRouter _makeRouter(Widget child, {String initialLocation = '/home'}) =>
     GoRouter(
       initialLocation: initialLocation,
       routes: [
@@ -19,7 +16,9 @@ GoRouter _makeRouter(
             GoRoute(path: '/home', builder: (_, _) => child),
             GoRoute(path: '/plans', builder: (_, _) => const Text('Plans')),
             GoRoute(
-                path: '/settings', builder: (_, _) => const Text('Settings')),
+              path: '/settings',
+              builder: (_, _) => const Text('Settings'),
+            ),
           ],
         ),
       ],
@@ -28,13 +27,12 @@ GoRouter _makeRouter(
 Widget _wrap({
   Widget body = const Text('Home'),
   String initialLocation = '/home',
-}) =>
-    ProviderScope(
-      overrides: authOverrides(),
-      child: MaterialApp.router(
-        routerConfig: _makeRouter(body, initialLocation: initialLocation),
-      ),
-    );
+}) => ProviderScope(
+  overrides: authOverrides(),
+  child: MaterialApp.router(
+    routerConfig: _makeRouter(body, initialLocation: initialLocation),
+  ),
+);
 
 void main() {
   group('MainScaffold', () {
@@ -84,16 +82,18 @@ void main() {
       expect(find.byIcon(Icons.event_note_outlined), findsNothing);
     });
 
-    testWidgets('Settings tab active when location is /settings',
-        (tester) async {
+    testWidgets('Settings tab active when location is /settings', (
+      tester,
+    ) async {
       await tester.pumpWidget(_wrap(initialLocation: '/settings'));
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.settings), findsOneWidget);
       expect(find.byIcon(Icons.settings_outlined), findsNothing);
     });
 
-    testWidgets('highlight follows navigation without imperative state',
-        (tester) async {
+    testWidgets('highlight follows navigation without imperative state', (
+      tester,
+    ) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 

@@ -1,0 +1,196 @@
+name: Mock CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment to simulate
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - staging
+          - production
+      version:
+        description: Optional mock release version
+        required: false
+        type: string
+      source_sha:
+        description: Optional commit SHA or ref (defaults to selected ref)
+        required: false
+        type: string
+      confirm:
+        description: Enter MOCK-PRODUCTION for a production simulation
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mock-cd-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare mock release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      actor: ${{ steps.metadata.outputs.actor }}
+      branch: ${{ steps.metadata.outputs.branch }}
+      commit: ${{ steps.metadata.outputs.commit }}
+      timestamp: ${{ steps.metadata.outputs.timestamp }}
+      version: ${{ steps.metadata.outputs.version }}
+    steps:
+      - name: Validate operator inputs
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          PRODUCTION_CONFIRMATION: ${{ inputs.confirm }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          if [[ "${TARGET_ENVIRONMENT}" == "production" && "${PRODUCTION_CONFIRMATION}" != "MOCK-PRODUCTION" ]]; then
+            echo "Production mock requires confirm=MOCK-PRODUCTION." >&2
+            exit 1
+          fi
+          if [[ -n "${SOURCE_SHA}" && ! "${SOURCE_SHA}" =~ ^[A-Za-z0-9._/-]{1,200}$ ]]; then
+            echo "source_sha contains unsupported characters." >&2
+            exit 1
+          fi
+          if [[ -n "${REQUESTED_VERSION}" && ! "${REQUESTED_VERSION}" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$ ]]; then
+            echo "version must be a single release identifier of at most 64 characters." >&2
+            exit 1
+          fi
+
+      - name: Check out trusted workflow helpers
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Check out selected source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+          path: selected-source
+
+      - name: Collect release metadata
+        id: metadata
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          commit="$(git -C selected-source rev-parse HEAD)"
+          case "${SOURCE_SHA}" in
+            "") branch="${GITHUB_REF_NAME}" ;;
+            refs/heads/*) branch="${SOURCE_SHA#refs/heads/}" ;;
+            refs/tags/*) branch="tag:${SOURCE_SHA#refs/tags/}" ;;
+            *)
+              if [[ "${SOURCE_SHA}" =~ ^[0-9A-Fa-f]{7,40}$ ]]; then
+                branch="detached"
+              else
+                branch="${SOURCE_SHA}"
+              fi
+              ;;
+          esac
+          version="${REQUESTED_VERSION}"
+          if [[ -z "${version}" ]]; then
+            package_version="$(sed -n 's/^version:[[:space:]]*//p' selected-source/pubspec.yaml | sed -n '1p')"
+            version="${package_version}-mock"
+          fi
+          if [[ ! "${version}" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$ ]]; then
+            echo "resolved version is not a safe release identifier." >&2
+            exit 1
+          fi
+          echo "actor=${GITHUB_ACTOR}" >> "$GITHUB_OUTPUT"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+          echo "commit=${commit}" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release manifest
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          RELEASE_VERSION: ${{ steps.metadata.outputs.version }}
+          RELEASE_COMMIT: ${{ steps.metadata.outputs.commit }}
+          RELEASE_BRANCH: ${{ steps.metadata.outputs.branch }}
+          RELEASE_ACTOR: ${{ steps.metadata.outputs.actor }}
+          RELEASE_TIMESTAMP: ${{ steps.metadata.outputs.timestamp }}
+        run: |
+          scripts/ci/mock_deploy.sh \
+            --environment "${TARGET_ENVIRONMENT}" \
+            --version "${RELEASE_VERSION}" \
+            --commit "${RELEASE_COMMIT}" \
+            --branch "${RELEASE_BRANCH}" \
+            --actor "${RELEASE_ACTOR}" \
+            --timestamp "${RELEASE_TIMESTAMP}" \
+            --prepare-only
+
+      - name: Transfer prepared manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-release-manifest-prepared
+          path: release-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+
+  mock-deploy:
+    name: Simulate deployment
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted workflow helpers
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download prepared manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: mock-release-manifest-prepared
+
+      - name: Run mock deployment
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_COMMIT: ${{ needs.prepare.outputs.commit }}
+          RELEASE_BRANCH: ${{ needs.prepare.outputs.branch }}
+          RELEASE_ACTOR: ${{ needs.prepare.outputs.actor }}
+          RELEASE_TIMESTAMP: ${{ needs.prepare.outputs.timestamp }}
+        run: |
+          scripts/ci/mock_deploy.sh \
+            --environment "${TARGET_ENVIRONMENT}" \
+            --version "${RELEASE_VERSION}" \
+            --commit "${RELEASE_COMMIT}" \
+            --branch "${RELEASE_BRANCH}" \
+            --actor "${RELEASE_ACTOR}" \
+            --timestamp "${RELEASE_TIMESTAMP}"
+
+      - name: Upload mock release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-release-${{ inputs.environment }}-${{ needs.prepare.outputs.commit }}
+          path: release-manifest.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Summarize mock deployment
+        env:
+          RELEASE_BRANCH: ${{ needs.prepare.outputs.branch }}
+          RELEASE_COMMIT: ${{ needs.prepare.outputs.commit }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          {
+            echo "## Mock deployment"
+            echo ""
+            echo "- Environment: \`${TARGET_ENVIRONMENT}\`"
+            echo "- Version: \`${RELEASE_VERSION}\`"
+            echo "- Branch: \`${RELEASE_BRANCH}\`"
+            echo "- Commit: \`${RELEASE_COMMIT}\`"
+            echo "- Platforms represented: Android and iOS"
+            echo "- External upload performed: **no**"
+          } >> "$GITHUB_STEP_SUMMARY"

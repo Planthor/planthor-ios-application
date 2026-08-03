@@ -10,8 +10,9 @@ import '../helpers/fakes.dart';
 void main() {
   group('appRouterProvider lifecycle', () {
     // GoRouter needs the Flutter binding for internal Navigator setup.
-    testWidgets('ProviderContainer dispose completes without error',
-        (tester) async {
+    testWidgets('ProviderContainer dispose completes without error', (
+      tester,
+    ) async {
       final container = ProviderContainer(
         overrides: [
           authProvider.overrideWith(FakeAuth.new),

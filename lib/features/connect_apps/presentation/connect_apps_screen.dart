@@ -269,10 +269,7 @@ class _StravaIcon extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.achievementGreen,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.surfaceCard,
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppColors.surfaceCard, width: 2),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x1A000000),
@@ -281,11 +278,7 @@ class _StravaIcon extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.check,
-                  size: 14,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.check, size: 14, color: Colors.white),
               ),
             ),
         ],
@@ -319,8 +312,7 @@ class _ActionButton extends ConsumerWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () =>
-            ref.read(stravaConnectionProvider.notifier).connect(),
+        onPressed: () => ref.read(stravaConnectionProvider.notifier).connect(),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.planthorBlue,
           foregroundColor: Colors.white,

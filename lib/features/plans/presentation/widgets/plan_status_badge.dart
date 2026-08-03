@@ -40,25 +40,25 @@ class PlanStatusBadge extends StatelessWidget {
   static (Color bg, Color fg, IconData icon) _statusStyle(PlanStatus status) {
     return switch (status) {
       PlanStatus.active => (
-          AppColors.planActiveLight,
-          AppColors.planBlueDark,
-          Icons.play_circle_outline,
-        ),
+        AppColors.planActiveLight,
+        AppColors.planBlueDark,
+        Icons.play_circle_outline,
+      ),
       PlanStatus.completed => (
-          AppColors.planGreenLight,
-          AppColors.planGreen,
-          Icons.check_circle_outline,
-        ),
+        AppColors.planGreenLight,
+        AppColors.planGreen,
+        Icons.check_circle_outline,
+      ),
       PlanStatus.overdue => (
-          AppColors.planOverdueLight,
-          AppColors.planOverdue,
-          Icons.warning_amber_rounded,
-        ),
+        AppColors.planOverdueLight,
+        AppColors.planOverdue,
+        Icons.warning_amber_rounded,
+      ),
       PlanStatus.upcoming => (
-          AppColors.planUpcomingLight,
-          AppColors.planUpcoming,
-          Icons.schedule,
-        ),
+        AppColors.planUpcomingLight,
+        AppColors.planUpcoming,
+        Icons.schedule,
+      ),
     };
   }
 }

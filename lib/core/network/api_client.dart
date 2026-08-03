@@ -32,10 +32,12 @@ final apiClientProvider = Provider<Dio>((ref) {
         handler.next(options);
       },
       onError: (error, handler) async {
-        final alreadyRetried = error.requestOptions.extra['_authRetried'] == true;
+        final alreadyRetried =
+            error.requestOptions.extra['_authRetried'] == true;
         if (error.response?.statusCode == 401 && !alreadyRetried) {
-          final refreshed =
-              await ref.read(authProvider.notifier).refreshTokens();
+          final refreshed = await ref
+              .read(authProvider.notifier)
+              .refreshTokens();
           if (refreshed != null) {
             final opts = error.requestOptions;
             opts.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
@@ -55,10 +57,14 @@ final apiClientProvider = Provider<Dio>((ref) {
 
   // Log every request/response to help diagnose auth issues.
   dio.interceptors.add(
-    LogInterceptor(requestBody: false, responseBody: true, logPrint: (o) {
-      // ignore: avoid_print
-      print('[API] $o');
-    }),
+    LogInterceptor(
+      requestBody: false,
+      responseBody: true,
+      logPrint: (o) {
+        // ignore: avoid_print
+        print('[API] $o');
+      },
+    ),
   );
 
   return dio;

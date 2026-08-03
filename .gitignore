@@ -33,6 +33,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+release-manifest.json
 
 # Symbolication related
 app.*.symbols

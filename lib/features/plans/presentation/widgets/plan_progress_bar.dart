@@ -25,7 +25,8 @@ class PlanProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clampedProgress = progress.clamp(0.0, 1.0);
-    final fillColor = activeColor ??
+    final fillColor =
+        activeColor ??
         (clampedProgress >= 1.0 ? AppColors.planGreen : AppColors.planBlueDark);
 
     return LayoutBuilder(
@@ -48,10 +49,7 @@ class PlanProgressBar extends StatelessWidget {
               height: height,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    fillColor,
-                    fillColor.withValues(alpha: 0.8),
-                  ],
+                  colors: [fillColor, fillColor.withValues(alpha: 0.8)],
                 ),
                 borderRadius: BorderRadius.circular(height / 2),
               ),
