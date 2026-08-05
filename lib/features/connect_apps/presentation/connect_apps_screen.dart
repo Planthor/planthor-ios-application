@@ -18,7 +18,7 @@ class ConnectAppsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(stravaConnectionProvider);
+    final status = ref.watch(stravaConnectionProvider).valueOrNull ?? StravaConnectionStatus.disconnected;
 
     return Scaffold(
       appBar: const PlanthorAppBar(showBack: true),

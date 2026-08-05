@@ -1,3 +1,6 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:planthor_ios_application/core/network/api_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'strava_connection_provider.g.dart';
@@ -6,37 +9,79 @@ part 'strava_connection_provider.g.dart';
 enum StravaConnectionStatus { disconnected, connecting, connected }
 
 /// Manages Strava connection state.
-///
-/// Currently stubbed with a simulated delay. Replace the body of
-/// [connect] / [disconnect] with real OAuth + backend calls when ready.
 @riverpod
 class StravaConnection extends _$StravaConnection {
   @override
-  StravaConnectionStatus build() {
-    return StravaConnectionStatus.disconnected;
+  FutureOr<StravaConnectionStatus> build() async {
+    return _fetchConnectionStatus();
   }
 
-  /// Initiates Strava OAuth connection.
-  ///
-  /// TODO: Replace stub with real Strava OAuth flow:
-  ///   1. Open Strava authorize URL via flutter_appauth
-  ///   2. Exchange code with backend (POST /api/strava/connect)
-  ///   3. Persist connection status
-  Future<void> connect() async {
-    state = StravaConnectionStatus.connecting;
+  Future<StravaConnectionStatus> _fetchConnectionStatus() async {
     try {
-      // Simulated delay — replace with actual API call.
-      await Future<void>.delayed(const Duration(seconds: 2));
-      state = StravaConnectionStatus.connected;
+      final dio = ref.read(apiClientProvider);
+      final response = await dio.get('/v1/members/@me/ExternalConnections');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final isConnected = data.any((c) =>
+            c['providerName']?.toString().toLowerCase() == 'strava');
+        return isConnected
+            ? StravaConnectionStatus.connected
+            : StravaConnectionStatus.disconnected;
+      }
+      return StravaConnectionStatus.disconnected;
     } catch (_) {
-      state = StravaConnectionStatus.disconnected;
+      return StravaConnectionStatus.disconnected;
+    }
+  }
+
+  /// Initiates Strava OAuth connection via BFF flow.
+  Future<void> connect() async {
+    state = const AsyncValue.data(StravaConnectionStatus.connecting);
+    try {
+      final dio = ref.read(apiClientProvider);
+
+      // Create a new dio instance that doesn't follow redirects
+      // to capture the authorize URL from the backend.
+      final dioNoRedirect = Dio(dio.options.copyWith(
+        followRedirects: false,
+        validateStatus: (status) => status != null && status < 400,
+      ));
+      dioNoRedirect.interceptors.addAll(dio.interceptors);
+
+      final response = await dioNoRedirect.get('/v1/Strava/authorize');
+      
+      final authorizeUrl = response.headers.value('location');
+      if (authorizeUrl == null) {
+        throw Exception('No redirect location found');
+      }
+
+      // Launch secure web view and wait for planthor:// callback
+      final resultUrl = await FlutterWebAuth2.authenticate(
+        url: authorizeUrl,
+        callbackUrlScheme: 'planthor',
+      );
+
+      if (resultUrl.contains('error=')) {
+        throw Exception('Authorization failed or denied.');
+      }
+
+      // Re-fetch to confirm the backend successfully exchanged and saved
+      final newStatus = await _fetchConnectionStatus();
+      state = AsyncValue.data(newStatus);
+    } catch (_) {
+      state = const AsyncValue.data(StravaConnectionStatus.disconnected);
     }
   }
 
   /// Disconnects Strava integration.
-  ///
-  /// TODO: Call backend (DELETE /api/strava/disconnect) and revoke tokens.
   Future<void> disconnect() async {
-    state = StravaConnectionStatus.disconnected;
+    state = const AsyncValue.data(StravaConnectionStatus.connecting);
+    try {
+      final dio = ref.read(apiClientProvider);
+      await dio.delete('/v1/Strava/disconnect');
+      state = const AsyncValue.data(StravaConnectionStatus.disconnected);
+    } catch (_) {
+      state = const AsyncValue.data(StravaConnectionStatus.disconnected);
+    }
   }
 }
