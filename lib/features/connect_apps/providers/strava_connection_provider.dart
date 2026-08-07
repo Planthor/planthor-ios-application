@@ -23,7 +23,8 @@ class StravaConnection extends _$StravaConnection {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         final isConnected = data.any((c) =>
-            c['providerName']?.toString().toLowerCase() == 'strava');
+            c['providerId']?.toString().toLowerCase() == 'strava' &&
+            c['statusId']?.toString() == 'A');
         return isConnected
             ? StravaConnectionStatus.connected
             : StravaConnectionStatus.disconnected;
