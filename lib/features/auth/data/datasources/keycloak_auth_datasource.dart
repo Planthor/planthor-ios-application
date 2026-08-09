@@ -4,6 +4,12 @@ import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 
 class KeycloakAuthDatasource {
+
+  KeycloakAuthDatasource({
+    FlutterAppAuth? appAuth,
+    FlutterSecureStorage? storage,
+  }) : _appAuth = appAuth ?? const FlutterAppAuth(),
+       _storage = storage ?? const FlutterSecureStorage();
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _tokenExpiryKey = 'token_expiry';
@@ -11,12 +17,6 @@ class KeycloakAuthDatasource {
 
   final FlutterAppAuth _appAuth;
   final FlutterSecureStorage _storage;
-
-  KeycloakAuthDatasource({
-    FlutterAppAuth? appAuth,
-    FlutterSecureStorage? storage,
-  }) : _appAuth = appAuth ?? const FlutterAppAuth(),
-       _storage = storage ?? const FlutterSecureStorage();
 
   Future<AuthToken> signIn() async {
     final result = await _appAuth.authorizeAndExchangeCode(

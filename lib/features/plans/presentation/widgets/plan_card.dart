@@ -136,8 +136,8 @@ class PlanCard extends StatelessWidget {
                               ),
                               if (_isComplete) ...[
                                 const SizedBox(width: 6),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 4),
                                   child: Icon(
                                     Icons.check_circle,
                                     size: 18,
@@ -149,7 +149,7 @@ class PlanCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           if (_isOverdue)
-                            _StatusLabel(
+                            const _StatusLabel(
                               text: 'MISSED DEADLINE',
                               color: AppColors.planOverdue,
                             )

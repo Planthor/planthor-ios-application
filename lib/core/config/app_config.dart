@@ -7,10 +7,39 @@ abstract final class AppConfig {
   static const _env = String.fromEnvironment('ENV', defaultValue: 'dev');
   static bool get isProduction => _env == 'prod';
 
+  static String get _defaultScheme => isProduction ? 'https' : 'http';
+
   // ── Keycloak ──────────────────────────────────────────────────────────
-  static const _keycloakDev = 'https://auth.planthor.space/realms/planthor';
-  static const _keycloakProd = 'https://auth.planthor.space/realms/planthor';
-  static String get keycloakBase => isProduction ? _keycloakProd : _keycloakDev;
+
+  /// Base URL for Keycloak.
+  /// Resolves in this order:
+  /// 1. --dart-define=KEYCLOAK_URL=... (e.g. https://my-auth.example.com)
+  /// 2. --dart-define=KEYCLOAK_SCHEME/KEYCLOAK_HOST/KEYCLOAK_PORT
+  /// 3. Dev defaults (uses API_HOST or localhost, port 8180) / Prod defaults
+  static String get keycloakBase {
+    const customUrl = String.fromEnvironment('KEYCLOAK_URL');
+    if (customUrl.isNotEmpty) return '$customUrl/realms/planthor';
+
+    const scheme = String.fromEnvironment('KEYCLOAK_SCHEME');
+    const host = String.fromEnvironment('KEYCLOAK_HOST');
+    const port = String.fromEnvironment('KEYCLOAK_PORT');
+
+    final finalScheme = scheme.isNotEmpty ? scheme : _defaultScheme;
+    final finalHost = host.isNotEmpty
+        ? host
+        : (isProduction
+            ? 'auth.planthor.space'
+            : const String.fromEnvironment(
+                'API_HOST',
+                defaultValue: 'localhost',
+              ));
+    final defaultPort = isProduction ? '' : '8180';
+    final finalPort = port.isNotEmpty
+        ? ':$port'
+        : (defaultPort.isNotEmpty ? ':$defaultPort' : '');
+
+    return '$finalScheme://$finalHost$finalPort/realms/planthor';
+  }
 
   static String get authEndpoint =>
       '$keycloakBase/protocol/openid-connect/auth';
@@ -28,13 +57,29 @@ abstract final class AppConfig {
   static bool get allowInsecureConnections => !keycloakBase.startsWith('https');
 
   // ── Resource API ──────────────────────────────────────────────────────
-  // Override host via: --dart-define=API_HOST=10.0.2.2 (Android emulator)
-  // or --dart-define=API_HOST=<LAN IP> (physical device)
-  static const _apiHost = String.fromEnvironment(
-    'API_HOST',
-    defaultValue: 'localhost',
-  );
-  static String get _apiDev => 'https://$_apiHost:7259';
-  static const _apiProd = 'https://api.planthor.space';
-  static String get apiBase => isProduction ? _apiProd : _apiDev;
+
+  /// Base URL for the Resource API.
+  /// Resolves in this order:
+  /// 1. --dart-define=API_URL=... (e.g. https://my-api.example.com)
+  /// 2. --dart-define=API_SCHEME/API_HOST/API_PORT
+  /// 3. Dev defaults (localhost, port 5008) / Prod defaults
+  static String get apiBase {
+    const customUrl = String.fromEnvironment('API_URL');
+    if (customUrl.isNotEmpty) return customUrl;
+
+    const scheme = String.fromEnvironment('API_SCHEME');
+    const host = String.fromEnvironment('API_HOST');
+    const port = String.fromEnvironment('API_PORT');
+
+    final finalScheme = scheme.isNotEmpty ? scheme : _defaultScheme;
+    final finalHost = host.isNotEmpty
+        ? host
+        : (isProduction ? 'api.planthor.space' : 'localhost');
+    final defaultPort = isProduction ? '' : '5008';
+    final finalPort = port.isNotEmpty
+        ? ':$port'
+        : (defaultPort.isNotEmpty ? ':$defaultPort' : '');
+
+    return '$finalScheme://$finalHost$finalPort';
+  }
 }

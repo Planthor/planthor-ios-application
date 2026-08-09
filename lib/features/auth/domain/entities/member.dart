@@ -1,10 +1,4 @@
 class Member {
-  final String id;
-  final String firstName;
-  final String? middleName;
-  final String lastName;
-  final String? description;
-  final String pathAvatar;
 
   const Member({
     required this.id,
@@ -15,15 +9,6 @@ class Member {
     required this.pathAvatar,
   });
 
-  String get displayName {
-    final parts = [
-      firstName,
-      if (middleName != null && middleName!.isNotEmpty) middleName!,
-      lastName,
-    ];
-    return parts.join(' ').trim();
-  }
-
   factory Member.fromJson(Map<String, dynamic> json) => Member(
     id: json['id'] as String,
     firstName: json['firstName'] as String,
@@ -32,4 +17,19 @@ class Member {
     description: json['description'] as String?,
     pathAvatar: json['pathAvatar'] as String? ?? '',
   );
+  final String id;
+  final String firstName;
+  final String? middleName;
+  final String lastName;
+  final String? description;
+  final String pathAvatar;
+
+  String get displayName {
+    final parts = [
+      firstName,
+      if (middleName != null && middleName!.isNotEmpty) middleName!,
+      lastName,
+    ];
+    return parts.join(' ').trim();
+  }
 }

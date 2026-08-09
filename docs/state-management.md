@@ -83,7 +83,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final personalPlansProvider = FutureProvider<List<PersonalPlan>>((ref) async {
   final dio = ref.watch(apiClientProvider);   // re-fetches if Dio changes
-  final response = await dio.get('/v1/members/me/PersonalPlans');
+  final response = await dio.get('/v1/members/me/personal-plans');
   return (response.data as List)
       .map((e) => PersonalPlan.fromJson(e as Map<String, dynamic>))
       .toList();
@@ -109,7 +109,7 @@ ref.invalidate(personalPlansProvider);
 
 | Provider | File | Fetches |
 |----------|------|---------|
-| `personalPlansProvider` | `lib/features/my_garden/bloc/personal_plans_provider.dart` | `GET /v1/members/me/PersonalPlans` |
+| `personalPlansProvider` | `lib/features/my_garden/bloc/personal_plans_provider.dart` | `GET /v1/members/me/personal-plans` |
 | `localStoreProvider` | `lib/core/storage/local_store.dart` | `SharedPreferences.getInstance()` — async init, returns `LocalStore` |
 | `apiClientProvider` | `lib/core/network/api_client.dart` | `Provider<Dio>` (not async, but plain Provider — same pattern) |
 | `appRouterProvider` | `lib/core/router/app_router.dart` | `Provider<GoRouter>` — reads `authProvider` for redirect guard |

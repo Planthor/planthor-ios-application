@@ -33,11 +33,11 @@ The token is injected automatically by `apiClientProvider` (`lib/core/network/ap
 
 | Method | URL | Request Body | Success Response |
 |--------|-----|-------------|-----------------|
-| `POST` | `/v1/members/{identifier}/PersonalPlans` | `CreatePlanCommand` | `200` — Guid (new plan ID) |
-| `GET` | `/v1/members/{identifier}/PersonalPlans` | — | `200` — `PersonalPlanDto[]` |
-| `GET` | `/v1/members/{identifier}/PersonalPlans/{planId}` | — | `200` — `PersonalPlanDto` |
-| `PUT` | `/v1/members/{identifier}/PersonalPlans/{planId}` | `UpdatePlanCommand` | `204 No Content` |
-| `PATCH` | `/v1/members/{identifier}/PersonalPlans` | — | `500` (not implemented) |
+| `POST` | `/v1/members/{identifier}/personal-plans` | `CreatePlanCommand` | `200` — Guid (new plan ID) |
+| `GET` | `/v1/members/{identifier}/personal-plans` | — | `200` — `PersonalPlanDto[]` |
+| `GET` | `/v1/members/{identifier}/personal-plans/{planId}` | — | `200` — `PersonalPlanDto` |
+| `PUT` | `/v1/members/{identifier}/personal-plans/{planId}` | `UpdatePlanCommand` | `204 No Content` |
+| `PATCH` | `/v1/members/{identifier}/personal-plans` | — | `500` (not implemented) |
 
 **Error responses:** `400` validation, `401` unauthenticated, `403` cross-user write attempt, `404` not found.
 
@@ -49,7 +49,7 @@ The token is injected automatically by `apiClientProvider` (`lib/core/network/ap
 
 | Provider | Endpoint | File |
 |----------|----------|------|
-| `personalPlansProvider` | `GET /v1/members/me/PersonalPlans` | `lib/features/my_garden/bloc/personal_plans_provider.dart` |
+| `personalPlansProvider` | `GET /v1/members/me/personal-plans` | `lib/features/my_garden/bloc/personal_plans_provider.dart` |
 
 > **Note:** `PlansScreen` (`lib/features/plans/`) currently renders 5 hardcoded demo `PersonalPlan` objects. No live API call is made from that screen yet — real integration pending.
 

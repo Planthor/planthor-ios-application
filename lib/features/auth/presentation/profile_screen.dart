@@ -48,7 +48,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
 
             // ── 3. Settings section ──
-            _SectionLabel(label: 'SETTINGS'),
+            const _SectionLabel(label: 'SETTINGS'),
             const SizedBox(height: 8),
             _SettingsCard(
               children: [
@@ -68,7 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
 
             // ── 4. Units section ──
-            _SectionLabel(label: 'UNITS'),
+            const _SectionLabel(label: 'UNITS'),
             const SizedBox(height: 8),
             _SettingsCard(
               children: [
@@ -90,7 +90,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
 
             // ── 5. Preferences section ──
-            _SectionLabel(label: 'PREFERENCES'),
+            const _SectionLabel(label: 'PREFERENCES'),
             const SizedBox(height: 8),
             _SettingsCard(
               children: [
@@ -232,7 +232,7 @@ class _ProfileHeader extends ConsumerWidget {
 class _StatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         SizedBox(
           width: double.infinity,
@@ -243,7 +243,7 @@ class _StatsGrid extends StatelessWidget {
             valueColor: AppColors.planthorBlue,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           child: _StatCard(
@@ -253,7 +253,7 @@ class _StatsGrid extends StatelessWidget {
             valueColor: AppColors.textMain,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           child: _StatCard(
@@ -453,7 +453,7 @@ class _SettingsRowNav extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
+                const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
               ],
             ),
           ),

@@ -3,10 +3,10 @@ import 'package:planthor_ios_application/features/auth/domain/entities/auth_toke
 import 'package:planthor_ios_application/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final KeycloakAuthDatasource _datasource;
 
   AuthRepositoryImpl({KeycloakAuthDatasource? datasource})
     : _datasource = datasource ?? KeycloakAuthDatasource();
+  final KeycloakAuthDatasource _datasource;
 
   @override
   Future<AuthToken> signIn() => _datasource.signIn();

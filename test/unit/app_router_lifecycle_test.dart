@@ -24,7 +24,7 @@ void main() {
       // ref.onDispose(sub.close) and ref.onDispose(notifier.dispose).
       container.read(appRouterProvider);
 
-      expect(() => container.dispose(), returnsNormally);
+      expect(container.dispose, returnsNormally);
     });
 
     testWidgets('sign-out redirects to /sign-in', (tester) async {

@@ -4,7 +4,7 @@ import 'package:planthor_ios_application/features/plans/domain/entities/personal
 
 final personalPlansProvider = FutureProvider<List<PersonalPlan>>((ref) async {
   final dio = ref.watch(apiClientProvider);
-  final response = await dio.get('/v1/members/me/PersonalPlans');
+  final response = await dio.get('/v1/members/me/personal-plans');
   return parsePersonalPlansResponse(response.data);
 });
 

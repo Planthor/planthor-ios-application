@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
@@ -25,7 +24,7 @@ class _MockAdapter implements HttpClientAdapter {
 
     if (options.path.contains('ExternalConnections')) {
       if (isConnected) {
-        final jsonStr = '[{"providerId": "strava", "statusId": "A"}]';
+        const jsonStr = '[{"providerId": "strava", "statusId": "A"}]';
         return ResponseBody.fromString(jsonStr, 200, headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
         });
