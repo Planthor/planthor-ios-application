@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:planthor_ios_application/core/network/api_client.dart';
@@ -19,7 +21,7 @@ class StravaConnection extends _$StravaConnection {
   Future<StravaConnectionStatus> _fetchConnectionStatus() async {
     try {
       final dio = ref.read(apiClientProvider);
-      final response = await dio.get('/v1/members/@me/ExternalConnections');
+      final response = await dio.get('/v1/members/me/ExternalConnections');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         final isConnected = data.any((c) =>
@@ -47,6 +49,7 @@ class StravaConnection extends _$StravaConnection {
         followRedirects: false,
         validateStatus: (status) => status != null && status < 400,
       ));
+      dioNoRedirect.httpClientAdapter = dio.httpClientAdapter;
       dioNoRedirect.interceptors.addAll(dio.interceptors);
 
       final response = await dioNoRedirect.get('/v1/Strava/authorize');
@@ -69,7 +72,8 @@ class StravaConnection extends _$StravaConnection {
       // Re-fetch to confirm the backend successfully exchanged and saved
       final newStatus = await _fetchConnectionStatus();
       state = AsyncValue.data(newStatus);
-    } catch (_) {
+    } catch (e, st) {
+      log('CONNECT ERROR: $e\n$st', name: 'StravaConnection');
       state = const AsyncValue.data(StravaConnectionStatus.disconnected);
     }
   }

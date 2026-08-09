@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -61,8 +62,7 @@ final apiClientProvider = Provider<Dio>((ref) {
       requestBody: false,
       responseBody: true,
       logPrint: (o) {
-        // ignore: avoid_print
-        print('[API] $o');
+        log('[API] $o', name: 'Network');
       },
     ),
   );

@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+import 'package:planthor_ios_application/core/network/api_client.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +11,20 @@ import 'package:planthor_ios_application/features/plans/bloc/personal_plans_prov
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
 
+class _MockAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+    throw DioException(requestOptions: options, type: DioExceptionType.connectionError);
+  }
+  @override
+  void close({bool force = false}) {}
+}
+
 Widget _wrap(Future<List<PersonalPlan>> Function() loadPlans) => ProviderScope(
-  overrides: [personalPlansProvider.overrideWith((ref) => loadPlans())],
+  overrides: [
+    personalPlansProvider.overrideWith((ref) => loadPlans()),
+    apiClientProvider.overrideWithValue(Dio()..httpClientAdapter = _MockAdapter()),
+  ],
   child: const MaterialApp(home: Scaffold(body: PlansScreen())),
 );
 
@@ -31,6 +47,9 @@ void main() {
       await tester.pumpWidget(_wrap(() => pending.future));
 
       expect(find.byKey(const Key('plans-loading')), findsOneWidget);
+      
+      pending.complete([]);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('shows empty state', (tester) async {
