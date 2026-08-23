@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/connect_apps/providers/strava_connection_provider.dart';
-import 'package:planthor_ios_application/features/plans/bloc/mock_plan_changes_provider.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_card.dart';
 
@@ -16,7 +15,7 @@ class PlansScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isConnected =
         ref.watch(stravaConnectionProvider).value == StravaConnectionStatus.connected;
-    final plansAsync = ref.watch(effectivePersonalPlansProvider);
+    final plansAsync = ref.watch(personalPlansProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,

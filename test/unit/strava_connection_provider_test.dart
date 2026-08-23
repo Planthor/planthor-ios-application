@@ -22,7 +22,7 @@ class _MockAdapter implements HttpClientAdapter {
       return ResponseBody.fromString('', 200);
     }
 
-    if (options.path.contains('ExternalConnections')) {
+    if (options.path.contains('external-connections')) {
       if (isConnected) {
         const jsonStr = '[{"providerId": "strava", "statusId": "A"}]';
         return ResponseBody.fromString(jsonStr, 200, headers: {

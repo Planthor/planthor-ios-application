@@ -21,7 +21,7 @@ class StravaConnection extends _$StravaConnection {
   Future<StravaConnectionStatus> _fetchConnectionStatus() async {
     try {
       final dio = ref.read(apiClientProvider);
-      final response = await dio.get('/v1/members/me/ExternalConnections');
+      final response = await dio.get('/v1/members/me/external-connections');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         final isConnected = data.any((c) =>
