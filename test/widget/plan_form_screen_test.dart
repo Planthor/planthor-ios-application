@@ -17,17 +17,19 @@ const _plan = PersonalPlan(
 );
 
 Widget _wrap(Widget child) => ProviderScope(
-      overrides: [
-        sportTypesProvider.overrideWith((ref) => Future.value(const [
-              SportType(id: 'RUN', name: 'Run'),
-              SportType(id: 'RIDE', name: 'Ride'),
-              SportType(id: 'SWIM', name: 'Swim'),
-              SportType(id: 'WALK', name: 'Walk'),
-              SportType(id: 'ALL', name: 'All Sport Types'),
-            ])),
-      ],
-      child: MaterialApp(home: child),
-    );
+  overrides: [
+    sportTypesProvider.overrideWith(
+      (ref) => Future.value(const [
+        SportType(id: 'RUN', name: 'Run'),
+        SportType(id: 'RIDE', name: 'Ride'),
+        SportType(id: 'SWIM', name: 'Swim'),
+        SportType(id: 'WALK', name: 'Walk'),
+        SportType(id: 'ALL', name: 'All Sport Types'),
+      ]),
+    ),
+  ],
+  child: MaterialApp(home: child),
+);
 
 void main() {
   group('PlanFormScreen', () {

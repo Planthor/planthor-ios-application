@@ -4,7 +4,6 @@ import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 
 class KeycloakAuthDatasource {
-
   KeycloakAuthDatasource({
     FlutterAppAuth? appAuth,
     FlutterSecureStorage? storage,

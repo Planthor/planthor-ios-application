@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
-import 'package:planthor_ios_application/features/plans/bloc/mock_plan_changes_provider.dart';
+import 'package:planthor_ios_application/features/plans/data/plan_repository.dart';
+import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/delete_plan_dialog.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_progress_ring.dart';
@@ -61,7 +62,7 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plan = ref.watch(mockPlanChangesProvider).resolve(_plan) ?? _plan;
+    final plan = _plan;
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,
@@ -124,8 +125,18 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
       builder: (_) => DeletePlanDialog(plan: plan),
     );
     if (confirmed != true || !mounted) return;
-    ref.read(mockPlanChangesProvider.notifier).delete(plan.id);
-    context.go('/plans');
+
+    try {
+      await ref.read(planRepositoryProvider).deletePlan(plan.id);
+      ref.invalidate(personalPlansProvider);
+      if (mounted) context.go('/plans');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to delete plan: $e')));
+      }
+    }
   }
 }
 
