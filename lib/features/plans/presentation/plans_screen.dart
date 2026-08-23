@@ -14,7 +14,8 @@ class PlansScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isConnected =
-        ref.watch(stravaConnectionProvider).value == StravaConnectionStatus.connected;
+        ref.watch(stravaConnectionProvider).value ==
+        StravaConnectionStatus.connected;
     final plansAsync = ref.watch(personalPlansProvider);
 
     return Scaffold(

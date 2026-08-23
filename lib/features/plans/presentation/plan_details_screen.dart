@@ -125,16 +125,16 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
       builder: (_) => DeletePlanDialog(plan: plan),
     );
     if (confirmed != true || !mounted) return;
-    
+
     try {
       await ref.read(planRepositoryProvider).deletePlan(plan.id);
       ref.invalidate(personalPlansProvider);
       if (mounted) context.go('/plans');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete plan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to delete plan: $e')));
       }
     }
   }

@@ -3,7 +3,6 @@ import 'package:planthor_ios_application/features/auth/domain/entities/auth_toke
 import 'package:planthor_ios_application/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-
   AuthRepositoryImpl({KeycloakAuthDatasource? datasource})
     : _datasource = datasource ?? KeycloakAuthDatasource();
   final KeycloakAuthDatasource _datasource;

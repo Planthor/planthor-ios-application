@@ -453,7 +453,11 @@ class _SettingsRowNav extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: AppColors.outline,
+                ),
               ],
             ),
           ),
@@ -659,7 +663,9 @@ class _SignOutButton extends StatelessWidget {
 class _ConnectToAppsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(stravaConnectionProvider).valueOrNull ?? StravaConnectionStatus.disconnected;
+    final status =
+        ref.watch(stravaConnectionProvider).valueOrNull ??
+        StravaConnectionStatus.disconnected;
     final subtitle = switch (status) {
       StravaConnectionStatus.connected => 'Strava (Connected)',
       StravaConnectionStatus.connecting => 'Strava (Connecting…)',

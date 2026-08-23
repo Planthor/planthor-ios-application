@@ -24,9 +24,11 @@ class StravaConnection extends _$StravaConnection {
       final response = await dio.get('/v1/members/me/external-connections');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        final isConnected = data.any((c) =>
-            c['providerId']?.toString().toLowerCase() == 'strava' &&
-            c['statusId']?.toString() == 'A');
+        final isConnected = data.any(
+          (c) =>
+              c['providerId']?.toString().toLowerCase() == 'strava' &&
+              c['statusId']?.toString() == 'A',
+        );
         return isConnected
             ? StravaConnectionStatus.connected
             : StravaConnectionStatus.disconnected;
@@ -45,15 +47,17 @@ class StravaConnection extends _$StravaConnection {
 
       // Create a new dio instance that doesn't follow redirects
       // to capture the authorize URL from the backend.
-      final dioNoRedirect = Dio(dio.options.copyWith(
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 400,
-      ));
+      final dioNoRedirect = Dio(
+        dio.options.copyWith(
+          followRedirects: false,
+          validateStatus: (status) => status != null && status < 400,
+        ),
+      );
       dioNoRedirect.httpClientAdapter = dio.httpClientAdapter;
       dioNoRedirect.interceptors.addAll(dio.interceptors);
 
       final response = await dioNoRedirect.get('/v1/Strava/authorize');
-      
+
       final authorizeUrl = response.headers.value('location');
       if (authorizeUrl == null) {
         throw Exception('No redirect location found');

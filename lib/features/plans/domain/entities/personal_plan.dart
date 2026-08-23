@@ -18,7 +18,6 @@ enum PlanStatus {
 }
 
 class PersonalPlan {
-
   const PersonalPlan({
     required this.id,
     required this.name,

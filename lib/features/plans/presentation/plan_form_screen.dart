@@ -109,7 +109,9 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   const _FieldLabel('SPORT TYPE'),
                   const SizedBox(height: AppSpacing.sm),
-                  ref.watch(sportTypesProvider).when(
+                  ref
+                      .watch(sportTypesProvider)
+                      .when(
                         data: (sportTypes) {
                           // The 'ALL' sport type requires special exclusivity logic if multiple selection was used,
                           // but for single selection Dropdown, they can just pick 'ALL'.
@@ -154,8 +156,10 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
                             },
                           );
                         },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (error, stack) => Text('Error loading sport types: $error'),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) =>
+                            Text('Error loading sport types: $error'),
                       ),
                   const SizedBox(height: AppSpacing.lg),
                   const _FieldLabel('TARGET DISTANCE'),
@@ -278,7 +282,14 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
     try {
       final repository = ref.read(planRepositoryProvider);
       final fromDate = _startDate!.toUtc().toIso8601String();
-      final toDate = DateTime(_endDate!.year, _endDate!.month, _endDate!.day, 23, 59, 59).toUtc().toIso8601String();
+      final toDate = DateTime(
+        _endDate!.year,
+        _endDate!.month,
+        _endDate!.day,
+        23,
+        59,
+        59,
+      ).toUtc().toIso8601String();
       final tz = await FlutterTimezone.getLocalTimezone();
 
       if (widget.isEditing) {
@@ -293,8 +304,10 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
         ref.invalidate(personalPlansProvider);
         if (mounted) context.go('/plans');
       } else {
-        final startDateLocal = '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
-        final endDateLocal = '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
+        final startDateLocal =
+            '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+        final endDateLocal =
+            '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
         final createData = {
           'name': _nameController.text.trim(),
           'unit': 'km',
@@ -319,9 +332,9 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save plan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save plan: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -448,7 +461,6 @@ InputDecoration _inputDecoration({
   }).toList();
   return (values[0], values[1]);
 }
-
 
 String _formatLongDate(DateTime date) =>
     '${_monthsLong[date.month]}, ${date.day}${_ordinal(date.day)}, ${date.year}';
