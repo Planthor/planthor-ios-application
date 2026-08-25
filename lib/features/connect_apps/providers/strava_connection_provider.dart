@@ -24,11 +24,17 @@ class StravaConnection extends _$StravaConnection {
       final response = await dio.get('/v1/members/me/external-connections');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        final isConnected = data.any(
-          (c) =>
-              c['providerId']?.toString().toLowerCase() == 'strava' &&
-              c['statusId']?.toString() == 'A',
-        );
+        final isConnected = data.any((c) {
+          final provider =
+              c['providerId'] ??
+              c['ProviderId'] ??
+              c['provider'] ??
+              c['Provider'];
+          final status =
+              c['statusId'] ?? c['StatusId'] ?? c['status'] ?? c['Status'];
+          return provider?.toString().toLowerCase() == 'strava' &&
+              status?.toString().toUpperCase() == 'A';
+        });
         return isConnected
             ? StravaConnectionStatus.connected
             : StravaConnectionStatus.disconnected;
