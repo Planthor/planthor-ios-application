@@ -6,6 +6,8 @@ import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:planthor_ios_application/features/plans/data/plan_repository.dart';
 import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/bloc/activity_logs_provider.dart';
+import 'package:planthor_ios_application/features/plans/domain/entities/activity_log.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/delete_plan_dialog.dart';
 import 'package:planthor_ios_application/features/plans/presentation/widgets/plan_progress_ring.dart';
@@ -30,39 +32,14 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
     icon: Icons.directions_run,
   );
 
-  static const _activities = [
-    _ActivityData(
-      name: 'Morning Run',
-      date: 'March 25, 2026 at 7:26 AM',
-      distance: '5.2 km',
-      metrics: [
-        _MetricData('DISTANCE', '5.2', 'km'),
-        _MetricData('AVG PACE', '6:45', '/km'),
-        _MetricData('MOVING TIME', '35:06'),
-        _MetricData('ELEVATION GAIN', '12', 'm'),
-        _MetricData('MAX ELEVATION', '8', 'm'),
-        _MetricData('TOTAL STEPS', '6240'),
-      ],
-    ),
-    _ActivityData(
-      name: 'Afternoon Jog',
-      date: 'March 25, 2026 at 4:15 PM',
-      distance: '4.8 km',
-    ),
-    _ActivityData(
-      name: 'Tempo Run',
-      date: 'March 25, 2026 at 7:00 PM',
-      distance: '6.5 km',
-    ),
-  ];
-
-  final Set<int> _expandedActivities = {0};
+  final Set<String> _expandedActivities = {};
 
   PersonalPlan get _plan => widget.plan ?? _demoPlan;
 
   @override
   Widget build(BuildContext context) {
     final plan = _plan;
+    final activityLogsAsync = ref.watch(activityLogsProvider(plan.id));
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,
@@ -92,27 +69,60 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          ...List.generate(_activities.length, (index) {
-            final activity = _activities[index];
-            final expanded = _expandedActivities.contains(index);
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index == _activities.length - 1 ? 0 : AppSpacing.smMd,
-              ),
-              child: _ActivityCard(
-                key: ValueKey(activity.name),
-                activity: activity,
-                expanded: expanded,
-                onTap: () => setState(() {
-                  if (expanded) {
-                    _expandedActivities.remove(index);
-                  } else {
-                    _expandedActivities.add(index);
-                  }
+          activityLogsAsync.when(
+            data: (logs) {
+              if (logs.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  child: Text(
+                    'No activities logged yet.',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: List.generate(logs.length, (index) {
+                  final log = logs[index];
+                  final expanded = _expandedActivities.contains(log.id);
+                  final activityData = _ActivityData.fromLog(log, plan.unit);
+                  
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == logs.length - 1 ? 0 : AppSpacing.smMd,
+                    ),
+                    child: _ActivityCard(
+                      key: ValueKey(log.id),
+                      activity: activityData,
+                      expanded: expanded,
+                      onTap: () => setState(() {
+                        if (expanded) {
+                          _expandedActivities.remove(log.id);
+                        } else {
+                          _expandedActivities.add(log.id);
+                        }
+                      }),
+                    ),
+                  );
                 }),
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.xl),
+                child: CircularProgressIndicator(),
               ),
-            );
-          }),
+            ),
+            error: (err, stack) => Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                'Failed to load activities.',
+                style: GoogleFonts.montserrat(color: AppColors.destructive),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -357,32 +367,39 @@ class _ExpandedActivity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasMetrics = activity.metrics.isNotEmpty;
+    final rowCount = (activity.metrics.length / 2).ceil();
+
     return Column(
       children: [
         _ActivityHeader(activity: activity, expanded: true),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Column(
-            children: [
-              for (var row = 0; row < 3; row++) ...[
-                if (row > 0) const SizedBox(height: AppSpacing.lg),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _MetricItem(metric: activity.metrics[row * 2]),
-                    ),
-                    const SizedBox(width: AppSpacing.xl),
-                    Expanded(
-                      child: _MetricItem(metric: activity.metrics[row * 2 + 1]),
-                    ),
-                  ],
-                ),
+        if (hasMetrics) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Column(
+              children: [
+                for (var row = 0; row < rowCount; row++) ...[
+                  if (row > 0) const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _MetricItem(metric: activity.metrics[row * 2]),
+                      ),
+                      const SizedBox(width: AppSpacing.xl),
+                      Expanded(
+                        child: row * 2 + 1 < activity.metrics.length
+                            ? _MetricItem(metric: activity.metrics[row * 2 + 1])
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: AppSpacing.xl),
       ],
     );
@@ -501,21 +518,6 @@ class _MetricItem extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            if (metric.unit != null) ...[
-              const SizedBox(width: AppSpacing.xs),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  metric.unit!,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    height: 1.33,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.inactive,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ],
@@ -531,6 +533,28 @@ class _ActivityData {
     this.metrics = const [],
   });
 
+  factory _ActivityData.fromLog(ActivityLog log, String planUnit) {
+    // Basic date formatting
+    final dt = log.completedDate;
+    final months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final timePrefix = dt.hour < 12 ? 'AM' : 'PM';
+    final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final formattedDate = '${months[dt.month]} ${dt.day}, ${dt.year} at $hour:$minute $timePrefix';
+    
+    // Formatting distance with unit
+    final formattedDistance = log.value == log.value.truncateToDouble()
+        ? '${log.value.toInt()} $planUnit'
+        : '${log.value} $planUnit';
+        
+    return _ActivityData(
+      name: log.externalSourceProvider ?? 'Activity',
+      date: formattedDate,
+      distance: formattedDistance,
+      metrics: const [], // Metrics omitted as they are not currently returned from backend
+    );
+  }
+
   final String name;
   final String date;
   final String distance;
@@ -538,9 +562,8 @@ class _ActivityData {
 }
 
 class _MetricData {
-  const _MetricData(this.label, this.value, [this.unit]);
+  const _MetricData(this.label, this.value);
 
   final String label;
   final String value;
-  final String? unit;
 }
