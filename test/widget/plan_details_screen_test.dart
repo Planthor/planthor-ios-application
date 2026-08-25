@@ -6,36 +6,38 @@ import 'package:planthor_ios_application/features/plans/bloc/activity_logs_provi
 import 'package:planthor_ios_application/features/plans/domain/entities/activity_log.dart';
 
 Widget _wrap() => ProviderScope(
-      overrides: [
-        activityLogsProvider('demo-plan').overrideWith((ref) => [
-              ActivityLog(
-                id: 'log-1',
-                planId: 'demo-plan',
-                value: 5.2,
-                activityLocalDate: '2026-03-25T07:26:00',
-                completedDate: DateTime(2026, 3, 25, 7, 26),
-                externalSourceProvider: 'Morning Run',
-              ),
-              ActivityLog(
-                id: 'log-2',
-                planId: 'demo-plan',
-                value: 4.8,
-                activityLocalDate: '2026-03-25T16:15:00',
-                completedDate: DateTime(2026, 3, 25, 16, 15),
-                externalSourceProvider: 'Afternoon Jog',
-              ),
-              ActivityLog(
-                id: 'log-3',
-                planId: 'demo-plan',
-                value: 6.5,
-                activityLocalDate: '2026-03-25T19:00:00',
-                completedDate: DateTime(2026, 3, 25, 19, 0),
-                externalSourceProvider: 'Tempo Run',
-              ),
-            ]),
+  overrides: [
+    activityLogsProvider('demo-plan').overrideWith(
+      (ref) => [
+        ActivityLog(
+          id: 'log-1',
+          planId: 'demo-plan',
+          value: 5.2,
+          activityLocalDate: '2026-03-25T07:26:00',
+          completedDate: DateTime(2026, 3, 25, 7, 26),
+          externalSourceProvider: 'Morning Run',
+        ),
+        ActivityLog(
+          id: 'log-2',
+          planId: 'demo-plan',
+          value: 4.8,
+          activityLocalDate: '2026-03-25T16:15:00',
+          completedDate: DateTime(2026, 3, 25, 16, 15),
+          externalSourceProvider: 'Afternoon Jog',
+        ),
+        ActivityLog(
+          id: 'log-3',
+          planId: 'demo-plan',
+          value: 6.5,
+          activityLocalDate: '2026-03-25T19:00:00',
+          completedDate: DateTime(2026, 3, 25, 19, 0),
+          externalSourceProvider: 'Tempo Run',
+        ),
       ],
-      child: const MaterialApp(home: PlanDetailsScreen()),
-    );
+    ),
+  ],
+  child: const MaterialApp(home: PlanDetailsScreen()),
+);
 
 void main() {
   group('PlanDetailsScreen', () {

@@ -14,8 +14,8 @@ class ActivityLog {
     planId: json['planId'] as String? ?? '',
     value: (json['value'] as num?)?.toDouble() ?? 0,
     activityLocalDate: json['activityLocalDate'] as String? ?? '',
-    completedDate: json['completedDate'] != null 
-        ? DateTime.parse(json['completedDate'] as String) 
+    completedDate: json['completedDate'] != null
+        ? DateTime.parse(json['completedDate'] as String)
         : DateTime.now(),
     externalSourceProvider: json['externalSourceProvider'] as String?,
     externalSourceId: json['externalSourceId'] as String?,

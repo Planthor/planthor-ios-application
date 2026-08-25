@@ -88,7 +88,7 @@ class _PlanDetailsScreenState extends ConsumerState<PlanDetailsScreen> {
                   final log = logs[index];
                   final expanded = _expandedActivities.contains(log.id);
                   final activityData = _ActivityData.fromLog(log, plan.unit);
-                  
+
                   return Padding(
                     padding: EdgeInsets.only(
                       bottom: index == logs.length - 1 ? 0 : AppSpacing.smMd,
@@ -536,22 +536,38 @@ class _ActivityData {
   factory _ActivityData.fromLog(ActivityLog log, String planUnit) {
     // Basic date formatting
     final dt = log.completedDate;
-    final months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final timePrefix = dt.hour < 12 ? 'AM' : 'PM';
     final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
     final minute = dt.minute.toString().padLeft(2, '0');
-    final formattedDate = '${months[dt.month]} ${dt.day}, ${dt.year} at $hour:$minute $timePrefix';
-    
+    final formattedDate =
+        '${months[dt.month]} ${dt.day}, ${dt.year} at $hour:$minute $timePrefix';
+
     // Formatting distance with unit
     final formattedDistance = log.value == log.value.truncateToDouble()
         ? '${log.value.toInt()} $planUnit'
         : '${log.value} $planUnit';
-        
+
     return _ActivityData(
       name: log.externalSourceProvider ?? 'Activity',
       date: formattedDate,
       distance: formattedDistance,
-      metrics: const [], // Metrics omitted as they are not currently returned from backend
+      metrics:
+          const [], // Metrics omitted as they are not currently returned from backend
     );
   }
 
