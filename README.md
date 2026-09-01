@@ -1,121 +1,100 @@
-# Planthor
+# Planthor Flutter Application
 
-> From Plan to Performance
+> From plan to performance.
 
-Planthor is a Flutter application for plant enthusiasts to discover plants, manage their personal garden, and stay on top of care schedules through reminders and goal tracking.
+Planthor is a Flutter application for athletes to create measurable fitness plans,
+track progress from activities, and connect external fitness services such as Strava.
 
-## Tech Stack
+> Product requirements, roadmaps, system architecture, and ADRs are maintained in the
+> canonical [Planthor Wiki](https://github.com/Planthor/planthor-documentation/wiki).
+> This README is authoritative for Flutter setup and repository structure.
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Flutter |
-| Language | Dart ≥ 3.11.5 |
-| State Management | Riverpod 2.x (`riverpod_generator`) |
-| Architecture | Feature-First Clean Architecture |
-| Code Generation | `build_runner` |
+## Current capabilities
 
-## Features
+| Capability | Status |
+| --- | --- |
+| Keycloak authentication and session restoration | Implemented |
+| Auth-aware navigation and responsive shell | Implemented |
+| Personal-plan list, create, edit, details, and delete flows | Implemented |
+| Plan activity ledger and progress presentation | Implemented |
+| Profile, personal information, and account deletion | Implemented |
+| Strava connection and disconnection through the backend BFF | Implemented |
+| Home activity experience and community features | Placeholder / planned |
 
-| Feature | Phase | Status |
-|---------|-------|--------|
-| Authentication (Sign In) | Phase 1 | ✅ Complete |
-| App Navigation | Phase 1 | ✅ Complete |
-| Theme & Design System | Phase 1 | ✅ Complete |
-| Plant Discovery | Phase 2 | 🚧 In Progress |
-| My Garden | Phase 2 | 🚧 In Progress |
-| Goal Tracking & Reminders | Phase 3 | 📋 Planned |
-| Community | Phase 3 | 📋 Planned |
-| Profile | Phase 3 | 📋 Planned |
+The legacy `plant_discovery` folder currently contains the temporary Home placeholder;
+it is not a Planthor product domain or roadmap feature.
 
-See [TODO.md](TODO.md) for the full roadmap.
+## Technology
 
-## Prerequisites
-
-- Flutter SDK (compatible with Dart ≥ 3.11.5) — install via [flutter.dev](https://flutter.dev/docs/get-started/install)
-- Xcode (for iOS builds)
-- Android Studio / Android SDK (for Android builds)
+| Area | Choice |
+| --- | --- |
+| Framework | Flutter 3.44.1 |
+| Language | Dart 3.11.5 or newer |
+| State | Riverpod 2 with generated notifiers where actions are required |
+| Navigation | GoRouter |
+| HTTP | Dio |
+| Architecture | Feature-first Clean Architecture |
 
 ## Setup
 
 ```bash
-# Install dependencies
 flutter pub get
-
-# Generate Riverpod providers and code
 dart run build_runner build --delete-conflicting-outputs
-
-# Verify no analysis issues
 flutter analyze
-
-# Run the app
-flutter run
+flutter test
+flutter run --dart-define=ENV=dev
 ```
 
-> Re-run `build_runner` whenever you modify a provider or annotated model.
+Use `ENV=prod` only when intentionally targeting production. Local authenticated
+flows require the companion backend and Keycloak configuration described in
+[Environment setup](docs/environment-setup.md).
 
-**New to this project?** Start with the [Flutter Onboarding Guide](docs/ONBOARDING.md) for the app's architecture, state, navigation, API flow, testing, and first-contribution workflow.
+## Repository structure
 
-## Architecture
-
-```mermaid
-graph TD
-    A[main.dart] -->|ProviderScope| B[MyApp]
-    B --> C[appThemeProvider]
-    B --> D[SignInScreen]
-    D --> E[MainScaffold]
-    E --> F[navigationProvider]
-    E --> G[Plant Discovery]
-    E --> H[My Garden]
-
-    subgraph core[lib/core]
-        I[theme]
-        J[services]
-        K[utils]
-        L[widgets]
-    end
-
-    subgraph features[lib/features]
-        M[auth ✅]
-        N[navigation ✅]
-        O[plant_discovery 🚧]
-        P[my_garden 🚧]
-        Q[goal_tracking 📋]
-        R[community 📋]
-        S[profile 📋]
-    end
-
-    subgraph datalayer[lib/data · lib/models — Phase 2/3]
-        T[repositories]
-        U[models]
-    end
-
-    B --- core
-    B --- features
-    features -.->|Phase 2/3| datalayer
-```
-
-## Project Structure
-
-```
+```text
 lib/
-├── main.dart                  # App entry point
+├── main.dart
 ├── core/
-│   ├── theme/                 # AppTheme, AppColors, AppTypography
-│   ├── services/              # Shared services
-│   ├── utils/                 # Utility helpers
-│   └── widgets/               # Shared UI components
-├── features/
-│   ├── auth/                  # Sign-in screen (Phase 1 ✅)
-│   ├── navigation/            # Bottom nav scaffold (Phase 1 ✅)
-│   ├── plant_discovery/       # Browse plants (Phase 2 🚧)
-│   ├── my_garden/             # Personal collection (Phase 2 🚧)
-│   ├── goal_tracking/         # Care reminders (Phase 3 📋)
-│   ├── community/             # Social features (Phase 3 📋)
-│   └── profile/               # User settings (Phase 3 📋)
-├── data/                      # Repositories & data sources (Phase 2+ 📋)
-└── models/                    # Shared domain models (Phase 2+ 📋)
+│   ├── config/       # environment-aware endpoints
+│   ├── layout/       # spacing, breakpoints, adaptive layout
+│   ├── network/      # shared authenticated Dio client
+│   ├── router/       # auth-aware GoRouter configuration
+│   ├── storage/      # local token and preference storage
+│   ├── theme/        # semantic colors and typography
+│   └── widgets/      # shared navigation and app chrome
+└── features/
+    ├── auth/         # sign-in, profile, member information
+    ├── connect_apps/ # Strava connection state and UI
+    ├── navigation/   # application shell
+    ├── plans/        # personal plans and activity progress
+    ├── community/    # planned community placeholder
+    └── plant_discovery/ # legacy Home placeholder pending rename
+
+test/
+├── helpers/
+├── unit/
+└── widget/
 ```
 
-## Contributing
+Do not edit generated `*.g.dart` files. Regenerate them after changing annotated
+Riverpod providers or generated models.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow, coding standards, and the PR process.
+## Documentation ownership
+
+- Read [Onboarding](docs/ONBOARDING.md) for the implementation mental model.
+- Read [Architecture](docs/architecture.md), [API](docs/api.md),
+  [Authentication](docs/authentication.md), and [State management](docs/state-management.md)
+  for repository-local implementation details.
+- Treat [DESIGN.md](DESIGN.md) and linked Figma nodes as the visual implementation contract.
+- Use the [Wiki](https://github.com/Planthor/planthor-documentation/wiki) for accepted
+  product behavior, user stories, architecture decisions, and roadmap priorities.
+
+## Quality workflow
+
+```bash
+./scripts/ci/quality_checks.sh
+```
+
+The command checks formatting, runs static analysis and tests with coverage, and
+reports the configured coverage threshold. See [CI/CD](docs/ci-cd.md) and
+[Contributing](CONTRIBUTING.md) before opening a pull request.
