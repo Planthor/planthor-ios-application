@@ -93,10 +93,16 @@ class StravaConnection extends _$StravaConnection {
     state = const AsyncValue.data(StravaConnectionStatus.connecting);
     try {
       final dio = ref.read(apiClientProvider);
-      await dio.delete('/v1/Strava/disconnect');
+      await dio.delete('/v1/members/me/ExternalConnections/STRAVA');
       state = const AsyncValue.data(StravaConnectionStatus.disconnected);
-    } catch (_) {
-      state = const AsyncValue.data(StravaConnectionStatus.disconnected);
+    } catch (e, st) {
+      log('DISCONNECT ERROR: $e\n$st', name: 'StravaConnection');
+      state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Reverts the UI state back to connected after a failed disconnect.
+  void revertToConnected() {
+    state = const AsyncValue.data(StravaConnectionStatus.connected);
   }
 }
