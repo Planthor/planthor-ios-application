@@ -22,6 +22,21 @@ class ConnectAppsScreen extends ConsumerWidget {
         ref.watch(stravaConnectionProvider).valueOrNull ??
         StravaConnectionStatus.disconnected;
 
+    ref.listen<AsyncValue<StravaConnectionStatus>>(stravaConnectionProvider, (
+      previous,
+      next,
+    ) {
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to disconnect Strava: ${next.error}')),
+        );
+        // Revert the state back to connected on the UI
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(stravaConnectionProvider.notifier).revertToConnected();
+        });
+      }
+    });
+
     return Scaffold(
       appBar: const PlanthorAppBar(showBack: true),
       backgroundColor: AppColors.surfaceBackground,
