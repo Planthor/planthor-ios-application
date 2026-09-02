@@ -169,7 +169,7 @@ When debugging:
 ## 9. First Contribution Checklist
 
 - Read [Architecture](architecture.md), [Navigation](navigation.md), [State Management](state-management.md), [API](api.md), and [Authentication](authentication.md) for deeper topic guides.
-- Read [Contributing](../CONTRIBUTING.md) and [Repository Guidelines](../AGENTS.md) before opening a pull request.
+- Read [Contributing](../CONTRIBUTING.md) before opening a pull request.
 - Keep changes inside the correct feature or core boundary.
 - Regenerate code after annotated-provider changes.
 - Run formatter, analysis, and relevant tests.

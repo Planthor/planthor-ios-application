@@ -26,6 +26,7 @@ on:
       - "pubspec.yaml"
       - "pubspec.lock"
       - "analysis_options.yaml"
+      - "sonar-project.properties"
       - ".github/workflows/**"
       - "scripts/ci/**"
   workflow_dispatch:
@@ -82,7 +83,7 @@ jobs:
             reason="manual workflow run"
           elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
             changed_files="$(git diff --name-only "${BASE_SHA}" "${GITHUB_SHA}")"
-            if grep -Eq '^(lib|test|integration_test|android|ios|assets|scripts/ci)/|^(pubspec\.yaml|pubspec\.lock|analysis_options\.yaml)$|^\.github/workflows/' <<< "${changed_files}"; then
+            if grep -Eq '^(lib|test|integration_test|android|ios|assets|scripts/ci)/|^(pubspec\.yaml|pubspec\.lock|analysis_options\.yaml|sonar-project\.properties)$|^\.github/workflows/' <<< "${changed_files}"; then
               run_quality="true"
               reason="Flutter-impacting files changed"
             else
@@ -138,6 +139,54 @@ jobs:
             echo "Execution: **${{ steps.scope.outputs.reason }}**"
             echo "Coverage policy: **${COVERAGE_MODE}** (threshold ${MIN_COVERAGE}%)"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  sonarqube:
+    name: SonarQube analysis
+    needs: quality
+    if: >-
+      needs.quality.outputs.run_platform_checks == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar-${{ hashFiles('sonar-project.properties') }}
+          restore-keys: ${{ runner.os }}-sonar-
+
+      - name: Run SonarQube analysis
+        uses: SonarSource/sonarqube-scan-action@v8.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   android-build:
     name: Android build verification

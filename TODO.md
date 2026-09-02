@@ -1,8 +1,10 @@
 # Flutter implementation backlog
 
-The canonical product roadmap and priorities are maintained in the
-[Planthor Wiki](https://github.com/Planthor/planthor-documentation/wiki/Roadmap).
-Do not maintain a competing product roadmap in this repository.
+## 🏗️ Phase 1: Project Setup & Foundation
+- [x] Initialize Flutter project (iOS & Android)
+- [x] Set up Riverpod state management & `build_runner`
+- [x] Set up basic app theme (Colors, Typography)
+- [x] Configure folder structure (Core vs Features)
 
 Repository-local follow-up work:
 
@@ -13,5 +15,4 @@ Repository-local follow-up work:
 - Keep Flutter API models and routes aligned with the backend-generated OpenAPI contract.
 - Add tests with every behavior change and keep the CI quality command passing.
 
-Track actionable work as GitHub issues linked to the relevant Wiki user story and
-acceptance criteria.
+---
