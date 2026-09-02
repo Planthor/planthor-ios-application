@@ -1,5 +1,7 @@
 # Planthor Flutter Application
 
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=Planthor_planthor-ios-application&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Planthor_planthor-ios-application)
+
 > From plan to performance.
 
 Planthor is a Flutter application for athletes to create measurable fitness plans,
