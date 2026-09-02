@@ -1,5 +1,4 @@
 class AuthToken {
-
   const AuthToken({
     required this.accessToken,
     required this.expiresAt,

@@ -21,12 +21,20 @@ class StravaConnection extends _$StravaConnection {
   Future<StravaConnectionStatus> _fetchConnectionStatus() async {
     try {
       final dio = ref.read(apiClientProvider);
-      final response = await dio.get('/v1/members/me/ExternalConnections');
+      final response = await dio.get('/v1/members/me/external-connections');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        final isConnected = data.any((c) =>
-            c['providerId']?.toString().toLowerCase() == 'strava' &&
-            c['statusId']?.toString() == 'A');
+        final isConnected = data.any((c) {
+          final provider =
+              c['providerId'] ??
+              c['ProviderId'] ??
+              c['provider'] ??
+              c['Provider'];
+          final status =
+              c['statusId'] ?? c['StatusId'] ?? c['status'] ?? c['Status'];
+          return provider?.toString().toLowerCase() == 'strava' &&
+              status?.toString().toUpperCase() == 'A';
+        });
         return isConnected
             ? StravaConnectionStatus.connected
             : StravaConnectionStatus.disconnected;
@@ -45,15 +53,17 @@ class StravaConnection extends _$StravaConnection {
 
       // Create a new dio instance that doesn't follow redirects
       // to capture the authorize URL from the backend.
-      final dioNoRedirect = Dio(dio.options.copyWith(
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 400,
-      ));
+      final dioNoRedirect = Dio(
+        dio.options.copyWith(
+          followRedirects: false,
+          validateStatus: (status) => status != null && status < 400,
+        ),
+      );
       dioNoRedirect.httpClientAdapter = dio.httpClientAdapter;
       dioNoRedirect.interceptors.addAll(dio.interceptors);
 
       final response = await dioNoRedirect.get('/v1/Strava/authorize');
-      
+
       final authorizeUrl = response.headers.value('location');
       if (authorizeUrl == null) {
         throw Exception('No redirect location found');
@@ -83,10 +93,16 @@ class StravaConnection extends _$StravaConnection {
     state = const AsyncValue.data(StravaConnectionStatus.connecting);
     try {
       final dio = ref.read(apiClientProvider);
-      await dio.delete('/v1/Strava/disconnect');
+      await dio.delete('/v1/members/me/ExternalConnections/STRAVA');
       state = const AsyncValue.data(StravaConnectionStatus.disconnected);
-    } catch (_) {
-      state = const AsyncValue.data(StravaConnectionStatus.disconnected);
+    } catch (e, st) {
+      log('DISCONNECT ERROR: $e\n$st', name: 'StravaConnection');
+      state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Reverts the UI state back to connected after a failed disconnect.
+  void revertToConnected() {
+    state = const AsyncValue.data(StravaConnectionStatus.connected);
   }
 }

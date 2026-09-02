@@ -13,9 +13,17 @@ import 'package:planthor_ios_application/features/plans/presentation/plans_scree
 
 class _MockAdapter implements HttpClientAdapter {
   @override
-  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
-    throw DioException(requestOptions: options, type: DioExceptionType.connectionError);
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      type: DioExceptionType.connectionError,
+    );
   }
+
   @override
   void close({bool force = false}) {}
 }
@@ -23,7 +31,9 @@ class _MockAdapter implements HttpClientAdapter {
 Widget _wrap(Future<List<PersonalPlan>> Function() loadPlans) => ProviderScope(
   overrides: [
     personalPlansProvider.overrideWith((ref) => loadPlans()),
-    apiClientProvider.overrideWithValue(Dio()..httpClientAdapter = _MockAdapter()),
+    apiClientProvider.overrideWithValue(
+      Dio()..httpClientAdapter = _MockAdapter(),
+    ),
   ],
   child: const MaterialApp(home: Scaffold(body: PlansScreen())),
 );
@@ -47,7 +57,7 @@ void main() {
       await tester.pumpWidget(_wrap(() => pending.future));
 
       expect(find.byKey(const Key('plans-loading')), findsOneWidget);
-      
+
       pending.complete([]);
       await tester.pumpAndSettle();
     });

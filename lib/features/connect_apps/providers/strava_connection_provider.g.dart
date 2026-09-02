@@ -6,7 +6,7 @@ part of 'strava_connection_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$stravaConnectionHash() => r'850e7e23acd5d32519040551d5f8731c9ffa9fcb';
+String _$stravaConnectionHash() => r'8dae5e1040e0da2beffa1af17e22065aab37688e';
 
 /// Manages Strava connection state.
 ///
