@@ -16,8 +16,10 @@ flutter run --dart-define=ENV=dev
 
 `ENV` controls endpoints in `lib/core/config/app_config.dart`:
 
-- `dev` is default. It uses hosted Keycloak and `https://localhost:7259` for the API.
+- `dev` is default. It uses local Keycloak at `http://localhost:8180` and the API at `http://localhost:5008`.
 - `prod` uses production Keycloak and `https://api.planthor.space`.
+
+For a custom local HTTPS endpoint, install a certificate trusted by the simulator or device. The app does not bypass TLS certificate validation.
 
 For an Android emulator or physical device, replace localhost with a reachable host:
 
