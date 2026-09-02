@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:planthor_ios_application/features/plans/bloc/sport_types_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
+import 'package:planthor_ios_application/features/plans/domain/entities/sport_type.dart';
 import 'package:planthor_ios_application/features/plans/presentation/plan_form_screen.dart';
 
 const _plan = PersonalPlan(
@@ -14,12 +16,26 @@ const _plan = PersonalPlan(
   icon: Icons.directions_run,
 );
 
-Widget _wrap(Widget child) => ProviderScope(child: MaterialApp(home: child));
+Widget _wrap(Widget child) => ProviderScope(
+  overrides: [
+    sportTypesProvider.overrideWith(
+      (ref) => Future.value(const [
+        SportType(id: 'RUN', name: 'Run'),
+        SportType(id: 'RIDE', name: 'Ride'),
+        SportType(id: 'SWIM', name: 'Swim'),
+        SportType(id: 'WALK', name: 'Walk'),
+        SportType(id: 'ALL', name: 'All Sport Types'),
+      ]),
+    ),
+  ],
+  child: MaterialApp(home: child),
+);
 
 void main() {
   group('PlanFormScreen', () {
     testWidgets('renders empty create form with disabled save', (tester) async {
       await tester.pumpWidget(_wrap(const PlanFormScreen()));
+      await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel('Create New Plan'), findsOneWidget);
       expect(find.byKey(const Key('plan-name-field')), findsOneWidget);
@@ -35,6 +51,7 @@ void main() {
 
     testWidgets('prefills edit form from mock plan', (tester) async {
       await tester.pumpWidget(_wrap(const PlanFormScreen(plan: _plan)));
+      await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel('Edit Plan'), findsOneWidget);
       expect(find.text('Run 100km in 2026'), findsOneWidget);
@@ -46,6 +63,7 @@ void main() {
 
     testWidgets('shows Figma name-length validation', (tester) async {
       await tester.pumpWidget(_wrap(const PlanFormScreen(plan: _plan)));
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const Key('plan-name-field')),
         'A plan name that is intentionally longer than fifty characters total',

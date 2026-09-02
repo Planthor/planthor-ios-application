@@ -28,11 +28,11 @@ abstract final class AppConfig {
     final finalHost = host.isNotEmpty
         ? host
         : (isProduction
-            ? 'auth.planthor.space'
-            : const String.fromEnvironment(
-                'API_HOST',
-                defaultValue: 'localhost',
-              ));
+              ? 'auth.planthor.space'
+              : const String.fromEnvironment(
+                  'API_HOST',
+                  defaultValue: 'localhost',
+                ));
     final defaultPort = isProduction ? '' : '8180';
     final finalPort = port.isNotEmpty
         ? ':$port'

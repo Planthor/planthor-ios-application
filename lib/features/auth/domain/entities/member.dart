@@ -1,5 +1,4 @@
 class Member {
-
   const Member({
     required this.id,
     required this.firstName,

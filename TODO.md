@@ -1,4 +1,4 @@
-# Planthor Project Roadmap
+# Flutter implementation backlog
 
 ## 🏗️ Phase 1: Project Setup & Foundation
 - [x] Initialize Flutter project (iOS & Android)
@@ -6,19 +6,13 @@
 - [x] Set up basic app theme (Colors, Typography)
 - [x] Configure folder structure (Core vs Features)
 
-## 🌿 Phase 2: Core Features (Plant Care)
-- [ ] **Feature: Plant Discovery**
-    - [ ] Create domain entities (Plant model)
-    - [ ] Build UI for browsing plants
-- [ ] **Feature: My Garden**
-    - [ ] Local storage setup (Drift or Hive) for offline saving
-    - [ ] UI for adding plants to personal collection
-- [ ] **Feature: Reminders**
-    - [ ] Local notifications for watering schedules
+Repository-local follow-up work:
 
-## 🛠️ Phase 3: Advanced Integration
-- [ ] Integration with a Backend (Firebase or Supabase)
-- [ ] Image picking (taking photos of your plants)
-- [ ] App Icon & Splash Screen design
+- Rename or replace the legacy `plant_discovery` Home placeholder with the accepted
+  athlete Home experience.
+- Replace remaining placeholder community content when its Wiki use cases become active
+  implementation work.
+- Keep Flutter API models and routes aligned with the backend-generated OpenAPI contract.
+- Add tests with every behavior change and keep the CI quality command passing.
 
 ---

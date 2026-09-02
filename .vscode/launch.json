@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Planthor (Dev)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENV=dev"
+            ]
+        },
+        {
+            "name": "Planthor (Prod)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=ENV=prod"
+            ]
+        }
+    ]
+}

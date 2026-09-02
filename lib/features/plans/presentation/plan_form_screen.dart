@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
-import 'package:planthor_ios_application/features/plans/bloc/mock_plan_changes_provider.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/data/plan_repository.dart';
+import 'package:planthor_ios_application/features/plans/bloc/sport_types_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 
 class PlanFormScreen extends ConsumerStatefulWidget {
@@ -22,7 +25,8 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _targetController;
-  late String _sportType;
+  bool _isLoading = false;
+  String? _sportType;
   DateTime? _startDate;
   DateTime? _endDate;
 
@@ -34,7 +38,7 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
     _targetController = TextEditingController(
       text: plan == null ? '' : plan.target.toStringAsFixed(1),
     );
-    _sportType = _sportFromIcon(plan?.icon);
+    _sportType = plan != null ? _sportFromIcon(plan.icon) : null;
     final dates = _parseDateRange(plan?.dateRange);
     _startDate = dates.$1;
     _endDate = dates.$2;
@@ -56,8 +60,10 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
   void _refreshSubmitState() => setState(() {});
 
   bool get _canSubmit =>
+      !_isLoading &&
       _nameController.text.trim().isNotEmpty &&
       (double.tryParse(_targetController.text) ?? 0) > 0 &&
+      _sportType != null &&
       _startDate != null &&
       _endDate != null;
 
@@ -103,33 +109,58 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   const _FieldLabel('SPORT TYPE'),
                   const SizedBox(height: AppSpacing.sm),
-                  DropdownButtonFormField<String>(
-                    key: const Key('sport-type-field'),
-                    initialValue: _sportType,
-                    decoration: _inputDecoration(
-                      prefixIcon: Icon(
-                        _sportIcon(_sportType),
-                        color: AppColors.brandDark,
-                        size: 22,
+                  ref
+                      .watch(sportTypesProvider)
+                      .when(
+                        data: (sportTypes) {
+                          // The 'ALL' sport type requires special exclusivity logic if multiple selection was used,
+                          // but for single selection Dropdown, they can just pick 'ALL'.
+                          return DropdownButtonFormField<String>(
+                            key: const Key('sport-type-field'),
+                            initialValue: _sportType,
+                            isExpanded: true,
+                            hint: const Text('Select a sport type'),
+                            decoration: _inputDecoration(
+                              prefixIcon: _sportType != null
+                                  ? Icon(
+                                      _sportIcon(_sportType!),
+                                      color: AppColors.brandDark,
+                                      size: 22,
+                                    )
+                                  : null,
+                            ),
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: AppColors.brandDark,
+                            ),
+                            items: sportTypes
+                                .map(
+                                  (sport) => DropdownMenuItem(
+                                    value: sport.id,
+                                    child: Text(
+                                      sport.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value == null) return;
+                              setState(() => _sportType = value);
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a sport type';
+                              }
+                              return null;
+                            },
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) =>
+                            Text('Error loading sport types: $error'),
                       ),
-                    ),
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.brandDark,
-                    ),
-                    items: const ['Run', 'Ride', 'Swim', 'Walk']
-                        .map(
-                          (sport) => DropdownMenuItem(
-                            value: sport,
-                            child: Text(sport),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setState(() => _sportType = value);
-                    },
-                  ),
                   const SizedBox(height: AppSpacing.lg),
                   const _FieldLabel('TARGET DISTANCE'),
                   const SizedBox(height: AppSpacing.sm),
@@ -191,14 +222,23 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
-                      child: Text(
-                        widget.isEditing ? 'UPDATE PLAN' : 'SAVE PLAN',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              widget.isEditing ? 'UPDATE PLAN' : 'SAVE PLAN',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -230,36 +270,74 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
     });
   }
 
-  void _savePlan() {
+  Future<void> _savePlan() async {
     if (!_formKey.currentState!.validate() || !_canSubmit) return;
     if (_endDate!.isBefore(_today()) || _endDate!.isBefore(_startDate!)) {
       setState(() {});
       return;
     }
 
-    final existing = widget.plan;
-    final plan = PersonalPlan(
-      id:
-          existing?.id ??
-          'mock-${DateTime.now().microsecondsSinceEpoch.toString()}',
-      name: _nameController.text.trim(),
-      dateRange:
-          '${_formatShortDate(_startDate!)} - ${_formatShortDate(_endDate!)}',
-      current: existing?.current ?? 0,
-      target: double.parse(_targetController.text),
-      unit: 'km',
-      icon: _sportIcon(_sportType),
-      status: existing?.status ?? PlanStatus.active,
-      description: existing?.description,
-    );
+    setState(() => _isLoading = true);
 
-    final notifier = ref.read(mockPlanChangesProvider.notifier);
-    if (widget.isEditing) {
-      notifier.update(plan);
-      context.go('/plans/${plan.id}', extra: plan);
-    } else {
-      notifier.create(plan);
-      context.go('/plans');
+    try {
+      final repository = ref.read(planRepositoryProvider);
+      final fromDate = _startDate!.toUtc().toIso8601String();
+      final toDate = DateTime(
+        _endDate!.year,
+        _endDate!.month,
+        _endDate!.day,
+        23,
+        59,
+        59,
+      ).toUtc().toIso8601String();
+      final tz = await FlutterTimezone.getLocalTimezone();
+
+      if (widget.isEditing) {
+        final updateData = {
+          'unit': 'km',
+          'target': double.parse(_targetController.text),
+          'current': widget.plan?.current ?? 0.0,
+          'fromDate': fromDate,
+          'toDate': toDate,
+        };
+        await repository.updatePlan(widget.plan!.id, updateData);
+        ref.invalidate(personalPlansProvider);
+        if (mounted) context.go('/plans');
+      } else {
+        final startDateLocal =
+            '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+        final endDateLocal =
+            '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
+        final createData = {
+          'name': _nameController.text.trim(),
+          'unit': 'km',
+          'target': double.parse(_targetController.text),
+          'fromDate': fromDate,
+          'toDate': toDate,
+          'startDateLocal': startDateLocal,
+          'endDateLocal': endDateLocal,
+          'timezone': tz.identifier,
+          'enableActivityLog': true,
+          'displayOnProfile': true,
+          'prioritize': 0,
+          'linkUserAdapter': false,
+          'planDetails': {
+            'type': 'sport',
+            'sportTypes': [_sportType ?? 'RUN'],
+          },
+        };
+        await repository.createPlan(createData);
+        ref.invalidate(personalPlansProvider);
+        if (mounted) context.go('/plans');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save plan: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }
@@ -384,9 +462,6 @@ InputDecoration _inputDecoration({
   return (values[0], values[1]);
 }
 
-String _formatShortDate(DateTime date) =>
-    '${_months[date.month]} ${date.day}, ${date.year}';
-
 String _formatLongDate(DateTime date) =>
     '${_monthsLong[date.month]}, ${date.day}${_ordinal(date.day)}, ${date.year}';
 
@@ -406,16 +481,20 @@ DateTime _today() {
 }
 
 String _sportFromIcon(IconData? icon) {
-  if (icon == Icons.directions_bike) return 'Ride';
-  if (icon == Icons.pool) return 'Swim';
-  if (icon == Icons.directions_walk) return 'Walk';
-  return 'Run';
+  if (icon == Icons.directions_bike) return 'RIDE';
+  if (icon == Icons.pool) return 'SWIM';
+  if (icon == Icons.directions_walk) return 'WALK';
+  if (icon == Icons.terrain) return 'HIKE';
+  if (icon == Icons.all_inclusive) return 'ALL';
+  return 'RUN';
 }
 
-IconData _sportIcon(String sport) => switch (sport) {
-  'Ride' => Icons.directions_bike,
-  'Swim' => Icons.pool,
-  'Walk' => Icons.directions_walk,
+IconData _sportIcon(String sportId) => switch (sportId.toUpperCase()) {
+  'RIDE' => Icons.directions_bike,
+  'SWIM' => Icons.pool,
+  'WALK' => Icons.directions_walk,
+  'HIKE' => Icons.terrain,
+  'ALL' => Icons.all_inclusive,
   _ => Icons.directions_run,
 };
 
