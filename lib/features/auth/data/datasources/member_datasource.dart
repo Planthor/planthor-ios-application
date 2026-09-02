@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/core/utils/jwt_utils.dart';
 
@@ -18,16 +15,6 @@ Future<String?> createMemberIfNeeded(String accessToken) async {
   final timezone = DateTime.now().timeZoneName;
 
   final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBase));
-
-  if (!AppConfig.isProduction) {
-    dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final client = HttpClient();
-        client.badCertificateCallback = (_, _, _) => true;
-        return client;
-      },
-    );
-  }
 
   try {
     final response = await dio.post(
