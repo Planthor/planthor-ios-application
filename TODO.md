@@ -2,9 +2,7 @@
 
 ## 🏗️ Phase 1: Project Setup & Foundation
 - [x] Initialize Flutter project (iOS & Android)
-- [x] Configure `GEMINI.md` for project standards
 - [x] Set up Riverpod state management & `build_runner`
-- [x] Create `flutter-feature-gen` AI Skill
 - [x] Set up basic app theme (Colors, Typography)
 - [x] Configure folder structure (Core vs Features)
 
@@ -24,4 +22,3 @@
 - [ ] App Icon & Splash Screen design
 
 ---
-*Note: Use `flutter-feature-gen` skill when starting any new feature.*

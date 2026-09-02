@@ -41,7 +41,7 @@ Linting is enforced via [`analysis_options.yaml`](analysis_options.yaml). Key ru
 
 ## Adding a New Feature
 
-Follow the Feature-First Clean Architecture pattern. Use the `flutter-feature-gen` AI skill when available.
+Follow the Feature-First Clean Architecture pattern.
 
 Manual scaffold:
 

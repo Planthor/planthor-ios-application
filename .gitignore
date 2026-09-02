@@ -64,7 +64,3 @@ dart_defines/*.json
 
 # Flutter version manager — SDK checkout/cache is local
 .fvm/
-
-# AI tooling
-.gemini/
-.agents/mcp_config.json
