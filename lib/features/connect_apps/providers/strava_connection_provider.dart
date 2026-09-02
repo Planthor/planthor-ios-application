@@ -93,7 +93,7 @@ class StravaConnection extends _$StravaConnection {
     state = const AsyncValue.data(StravaConnectionStatus.connecting);
     try {
       final dio = ref.read(apiClientProvider);
-      await dio.delete('/v1/members/me/ExternalConnections/STRAVA');
+      await dio.delete('/v1/members/me/external-connections/STRAVA');
       state = const AsyncValue.data(StravaConnectionStatus.disconnected);
     } catch (e, st) {
       log('DISCONNECT ERROR: $e\n$st', name: 'StravaConnection');
