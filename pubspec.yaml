@@ -66,6 +66,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Use Dev when flutter run/build is invoked without --flavor.
+  # Its separate application ID keeps local builds from replacing Prod.
+  # Select production explicitly with --flavor prod; debug/profile/release
+  # controls the build mode independently of the environment flavor.
+  default-flavor: dev
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -1,11 +1,16 @@
+import 'package:flutter/services.dart' show appFlavor;
+
 /// Centralized app configuration with environment-aware switching.
 ///
-/// Use `--dart-define=ENV=prod` to target cloud services.
+/// Use `--flavor prod` to target cloud services and the production app identity.
 /// Defaults to `dev` (local infrastructure via Docker Compose).
 abstract final class AppConfig {
-  // Toggle via: flutter run --dart-define=ENV=prod
-  static const _env = String.fromEnvironment('ENV', defaultValue: 'dev');
+  // Native flavor takes precedence so ENV cannot mismatch the installed app.
+  // Retain ENV as a fallback for tests and platforms without native flavors.
+  static const _env =
+      appFlavor ?? String.fromEnvironment('ENV', defaultValue: 'dev');
   static bool get isProduction => _env == 'prod';
+  static String get displayName => isProduction ? 'Planthor' : 'Planthor Dev';
 
   static String get _defaultScheme => isProduction ? 'https' : 'http';
 
@@ -49,8 +54,10 @@ abstract final class AppConfig {
       '$keycloakBase/protocol/openid-connect/logout';
 
   static const clientId = 'planthor-ios';
-  static const redirectUri = 'planthor://callback';
-  static const postLogoutUri = 'planthor://callback';
+  static String get callbackScheme =>
+      isProduction ? 'planthor' : 'planthor-dev';
+  static String get redirectUri => '$callbackScheme://callback';
+  static String get postLogoutUri => redirectUri;
   static const scopes = ['openid', 'profile', 'email', 'offline_access'];
 
   /// `true` for dev (localhost HTTP), `false` for prod (HTTPS).

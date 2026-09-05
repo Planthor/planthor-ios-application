@@ -66,8 +66,8 @@ authProvider state updates → GoRouter redirect guard fires → navigates to /h
 Pass a single define at run time — `AppConfig` derives all endpoints from it:
 
 ```bash
-flutter run --dart-define=ENV=dev    # → localhost Keycloak + API
-flutter run --dart-define=ENV=prod   # → auth.planthor.space + api.planthor.space
+flutter run --flavor dev    # → localhost Keycloak + API
+flutter run --flavor prod   # → auth.planthor.space + api.planthor.space
 ```
 
 | Setting | dev | prod |
@@ -76,13 +76,13 @@ flutter run --dart-define=ENV=prod   # → auth.planthor.space + api.planthor.sp
 | API base | `http://localhost:5008` | `https://api.planthor.space` |
 | Insecure HTTP | allowed | blocked |
 | Client ID | `planthor-ios` | `planthor-ios` |
-| Redirect URI | `planthor://callback` | `planthor://callback` |
+| Redirect URI | `planthor-dev://callback` | `planthor://callback` |
 
 All values live in `lib/core/config/app_config.dart`. No JSON config files needed.
 
 ## Platform Redirect URI Registration
 
-The `planthor://callback` URI scheme is registered on both platforms so the OS routes the OAuth callback back to the app.
+Each flavor registers its own callback on both platforms: `planthor-dev://callback` for Dev and `planthor://callback` for Prod. See [local service configuration](environment-setup.md#separate-dev-and-prod-installations) for Keycloak and Strava settings.
 
 **iOS** (`ios/Runner/Info.plist`):
 ```xml
@@ -90,7 +90,7 @@ The `planthor://callback` URI scheme is registered on both platforms so the OS r
 <array>
   <dict>
     <key>CFBundleURLSchemes</key>
-    <array><string>planthor</string></array>
+    <array><string>$(APP_URL_SCHEME)</string></array>
   </dict>
 </array>
 ```
@@ -100,7 +100,9 @@ The `planthor://callback` URI scheme is registered on both platforms so the OS r
 The `appAuthRedirectScheme` manifest placeholder in `android/app/build.gradle.kts` registers the scheme automatically via the flutter_appauth plugin's manifest merge:
 
 ```kotlin
-manifestPlaceholders["appAuthRedirectScheme"] = "planthor"
+// In each product flavor:
+manifestPlaceholders["appAuthRedirectScheme"] = "planthor-dev" // dev
+// prod uses "planthor"
 ```
 
 ## Android OAuth Configuration Decisions

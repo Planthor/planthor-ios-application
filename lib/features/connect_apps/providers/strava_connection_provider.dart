@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:planthor_ios_application/core/config/app_config.dart';
 import 'package:planthor_ios_application/core/network/api_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -69,10 +70,10 @@ class StravaConnection extends _$StravaConnection {
         throw Exception('No redirect location found');
       }
 
-      // Launch secure web view and wait for planthor:// callback
+      // Keep callbacks isolated when Dev and Prod are both installed.
       final resultUrl = await FlutterWebAuth2.authenticate(
         url: authorizeUrl,
-        callbackUrlScheme: 'planthor',
+        callbackUrlScheme: AppConfig.callbackScheme,
       );
 
       if (resultUrl.contains('error=')) {

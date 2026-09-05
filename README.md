@@ -44,10 +44,10 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter analyze
 flutter test
-flutter run --dart-define=ENV=dev
+flutter run --flavor dev
 ```
 
-Use `ENV=prod` only when intentionally targeting production. Local authenticated
+Use `--flavor prod` only when intentionally targeting production. Local authenticated
 flows require the companion backend and Keycloak configuration described in
 [Environment setup](docs/environment-setup.md).
 

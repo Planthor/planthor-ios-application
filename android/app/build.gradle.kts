@@ -37,6 +37,21 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Planthor Dev")
+            manifestPlaceholders["appAuthRedirectScheme"] = "planthor-dev"
+        }
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "Planthor")
+            manifestPlaceholders["appAuthRedirectScheme"] = "planthor"
+        }
+    }
 }
 
 flutter {

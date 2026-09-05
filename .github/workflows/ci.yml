@@ -238,7 +238,7 @@ jobs:
           echo "artifact_name=${artifact_file%.apk}" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
-        run: flutter build apk --debug --no-pub
+        run: flutter build apk --flavor dev --debug --no-pub
 
       - name: Name and checksum artifact
         if: github.event_name != 'pull_request'
@@ -246,7 +246,7 @@ jobs:
           ARTIFACT_FILE: ${{ steps.metadata.outputs.artifact_file }}
         run: |
           artifact_dir="build/app/outputs/flutter-apk"
-          mv "${artifact_dir}/app-debug.apk" "${artifact_dir}/${ARTIFACT_FILE}"
+          mv "${artifact_dir}/app-dev-debug.apk" "${artifact_dir}/${ARTIFACT_FILE}"
           sha256sum "${artifact_dir}/${ARTIFACT_FILE}" | tee "${artifact_dir}/${ARTIFACT_FILE}.sha256"
 
       - name: Upload Android artifact
@@ -310,7 +310,7 @@ jobs:
         run: flutter pub get
 
       - name: Build unsigned iOS app
-        run: flutter build ios --debug --no-codesign --no-pub
+        run: flutter build ios --flavor dev --debug --no-codesign --no-pub
 
       - name: Summarize iOS verification
         run: |
