@@ -1,21 +1,115 @@
+// Keep Planthor presets and inputs aligned in both .vscode/launch.json files.
+// Select the matching device with Flutter: Select Device before launching.
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Planthor (Dev)",
-            "request": "launch",
+            "name": "Planthor | Dev | iOS Simulator | Debug",
             "type": "dart",
-            "args": [
-                "--dart-define=ENV=dev"
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "dev",
+                "--dart-define=API_HOST=localhost"
             ]
         },
         {
-            "name": "Planthor (Prod)",
-            "request": "launch",
+            "name": "Planthor | Dev | Android Emulator | Debug",
             "type": "dart",
-            "args": [
-                "--dart-define=ENV=prod"
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "dev",
+                "--dart-define=API_HOST=10.0.2.2"
             ]
+        },
+        {
+            "name": "Planthor | Dev | Custom Host (iOS / Android) | Debug",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "dev",
+                "--dart-define=API_HOST=${input:devHost}"
+            ]
+        },
+        {
+            "name": "Planthor | Dev | Custom Host (iOS / Android) | Profile",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "profile",
+            "toolArgs": [
+                "--flavor",
+                "dev",
+                "--dart-define=API_HOST=${input:devHost}"
+            ]
+        },
+        {
+            "name": "Planthor | Dev | Custom Host (iOS / Android) | Release",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "release",
+            "toolArgs": [
+                "--flavor",
+                "dev",
+                "--dart-define=API_HOST=${input:devHost}"
+            ]
+        },
+        {
+            "name": "Planthor | Prod | iOS / Android | Debug",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "prod"
+            ]
+        },
+        {
+            "name": "Planthor | Prod | iOS / Android | Profile",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "profile",
+            "toolArgs": [
+                "--flavor",
+                "prod"
+            ]
+        },
+        {
+            "name": "Planthor | Prod | iOS / Android | Release",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "flutterMode": "release",
+            "toolArgs": [
+                "--flavor",
+                "prod"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "devHost",
+            "type": "promptString",
+            "description": "Host reachable from the selected device for local API and Keycloak (IP or hostname only, no scheme or port)"
         }
     ]
 }

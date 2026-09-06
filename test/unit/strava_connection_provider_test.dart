@@ -83,7 +83,8 @@ void main() {
             if (methodCall.method == 'authenticate') {
               // Simulate successful auth which should then set isConnected to true on the backend mock
               mockAdapter.isConnected = true;
-              return 'planthor://callback?code=123';
+              expect(methodCall.arguments['callbackUrlScheme'], 'planthor-dev');
+              return 'planthor-dev://callback?code=123';
             }
             return null;
           });

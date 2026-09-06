@@ -8,8 +8,8 @@ Planthor uses GitHub Actions for Flutter quality checks, SonarQube Cloud analysi
 - Java: Temurin 17, matching the Android Gradle configuration.
 - Production branch: `main` (the repository default branch).
 - Future integration branches: `develop` and `staging`.
-- Android target: the default `lib/main.dart` entrypoint with no product flavor.
-- iOS target: an unsigned debug device build using the default Runner scheme.
+- Android target: the `lib/main.dart` entrypoint with the `dev` product flavor.
+- iOS target: an unsigned debug device build using the shared `dev` scheme.
 - Validation artifact: debug APK, retained for 3 days.
 - Coverage: report-only with a visible 70% candidate threshold.
 
@@ -92,8 +92,8 @@ GitHub branch protection and spending controls are repository settings and canno
 - Formatting failure: run `dart format .`, review the diff, and commit the formatted files.
 - Analyzer failure: run `flutter analyze --fatal-infos --fatal-warnings` with Flutter 3.44.1.
 - Test or coverage failure: run `flutter test --no-pub --coverage`, then inspect `coverage/lcov.info`.
-- Android failure: confirm Java 17 is active and run `flutter build apk --debug --no-pub`.
-- iOS failure: use macOS with Xcode and CocoaPods installed, then run `flutter build ios --debug --no-codesign --no-pub`.
+- Android failure: confirm Java 17 is active and run `flutter build apk --flavor dev --debug --no-pub`.
+- iOS failure: use macOS with Xcode and CocoaPods installed, then run `flutter build ios --flavor dev --debug --no-codesign --no-pub`.
 - Missing manifest: rerun `scripts/ci/mock_deploy.sh` with every required argument.
 - Production mock rejected: provide the exact confirmation `MOCK-PRODUCTION`.
 

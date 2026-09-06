@@ -11,21 +11,23 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter analyze
 flutter test
-flutter run --dart-define=ENV=dev
+flutter run --flavor dev
 ```
 
-`ENV` controls endpoints in `lib/core/config/app_config.dart`:
+The native flavor controls the installed app identity and endpoints in `lib/core/config/app_config.dart`:
 
 - `dev` is default. It uses local Keycloak at `http://localhost:8180` and the API at `http://localhost:5008`.
 - `prod` uses production Keycloak and `https://api.planthor.space`.
 
 For a custom local HTTPS endpoint, install a certificate trusted by the simulator or device. The app does not bypass TLS certificate validation.
 
-For an Android emulator or physical device, replace localhost with a reachable host:
+For an Android emulator, replace localhost with the emulator's host address:
 
 ```bash
-flutter run --dart-define=ENV=dev --dart-define=API_HOST=10.0.2.2
+flutter run --flavor dev --dart-define=API_HOST=10.0.2.2
 ```
+
+For a physical iOS or Android device, use your computer's LAN IP or a reachable hostname instead of `10.0.2.2`. VS Code provides matching environment presets in both the parent and app workspaces; see [VS Code setup](environment-setup.md#vs-code).
 
 This repository does not contain the backend. Start its companion API before testing authenticated API calls. For prerequisites and platform troubleshooting, see [Environment Setup](environment-setup.md).
 
