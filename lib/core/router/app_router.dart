@@ -7,9 +7,9 @@ import 'package:planthor_ios_application/features/auth/presentation/sign_in_scre
 import 'package:planthor_ios_application/features/auth/presentation/profile_screen.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/main_scaffold.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
-import 'package:planthor_ios_application/features/plans/presentation/plan_details_screen.dart';
-import 'package:planthor_ios_application/features/plans/presentation/plan_form_screen.dart';
-import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/screens/plan_details_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/screens/plan_form_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/screens/plans_screen.dart';
 import 'package:planthor_ios_application/features/plant_discovery/presentation/discovery_screen.dart';
 
 class _AuthRefreshNotifier extends ChangeNotifier {

@@ -7,7 +7,7 @@ import 'package:planthor_ios_application/core/widgets/planthor_app_bar.dart';
 import 'package:planthor_ios_application/core/widgets/planthor_bottom_nav.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
-import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key, required this.child});

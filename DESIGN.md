@@ -3,8 +3,11 @@
 Source: [Planthor Figma](https://www.figma.com/design/yqTi4zKDeLGvZXZiepxFAB/Planthor?node-id=0-1)
 
 This document is the implementation contract between the Figma file and the
-Flutter application. Figma node IDs are authoritative references. Prefer shared
-tokens and widgets over copying raw values into screens.
+Flutter application. Figma node IDs are authoritative references. See
+[accessibility guidance](docs/accessibility.md) for Apple HIG/WCAG requirements and
+pending design conflicts. Prepare a proposed correction and obtain a design decision
+before changing a conflicting visual; this skill/folder setup does not alter the UI.
+Prefer shared tokens and widgets over copying raw values into screens.
 
 ## Product structure
 

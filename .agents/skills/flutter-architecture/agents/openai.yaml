@@ -1,0 +1,6 @@
+interface:
+  display_name: "Flutter Architecture"
+  short_description: "Feature boundaries and repository structure"
+  default_prompt: "Use $flutter-architecture to complete this Planthor mobile task."
+policy:
+  allow_implicit_invocation: true

@@ -1,156 +1,51 @@
-# State Management
+# State management
 
-Planthor uses **Riverpod** with two patterns depending on whether the state needs actions or is read-only.
+Planthor uses Riverpod **2**, with plain providers for read-only queries and
+generated notifiers for actions. Check `pubspec.lock` before using documentation
+examples: APIs from Riverpod 3 may not apply.
 
----
+## Current code
 
-## Pattern 1 — `@riverpod` class (mutable state + actions)
+| Provider | Responsibility |
+| --- | --- |
+| `authProvider` | Async token/session state and sign-in/out/refresh actions |
+| `appRouterProvider` | Auth-aware GoRouter; redirect refresh subscription |
+| `appThemeProvider` | Application theme |
+| `stravaConnectionProvider` | Async backend connection status, connect and disconnect |
+| `personalPlansProvider` | Fetch and parse personal plans |
+| `activityLogsProvider(planId)` | Fetch and parse a plan's activity ledger |
+| `sportTypesProvider` | Read available sport types |
+| `localStoreProvider` | SharedPreferences-backed local store |
+| `navigationProvider` | Legacy tab-index state; shell derives current tab from routing |
 
-Use for: auth state, navigation index, theme, any state that needs methods (signIn, signOut, setIndex).
+Plans providers live under `lib/features/plans/presentation/providers/`.
+Other feature providers retain their historical locations.
 
-**Requires code generation.** After any change, run:
+## Usage conventions
 
-```bash
+Use `ref.watch` for render dependencies, `ref.read(provider.notifier)` in action
+callbacks, and `ref.listen` for appropriate reactions. Do not start navigation or
+requests as side effects of a widget's build. Use `AsyncValue` loading/data/error
+states explicitly, check mounted after async widget work, and dispose owned resources.
+
+For future boundary migrations, expose repositories through composition providers;
+query/action providers depend on contracts, and successful actions invalidate
+affected reads. Current plans providers still perform HTTP directly and screens
+still coordinate mutations. This initial folder change preserves those behaviors.
+
+Generated action providers use `@riverpod`. After changing generation inputs:
+
+```sh
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### Declaration
+Do not edit `*.g.dart`. The current quality script runs `flutter analyze`;
+`custom_lint`/`riverpod_lint` are dependencies but a separate CI lint gate is future
+work. Do not claim it already runs.
 
-```dart
-// lib/features/auth/presentation/providers/auth_provider.dart
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+## Tests
 
-part 'auth_provider.g.dart';   // generated file — never edit manually
-
-@riverpod
-class Auth extends _$Auth {
-  @override
-  Future<AuthToken?> build() async {
-    // Called once on first watch. Return initial state.
-    return _repository.getStoredToken();
-  }
-
-  Future<void> signIn() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(_repository.signIn);
-  }
-
-  Future<void> signOut() async {
-    await _repository.signOut();
-    state = const AsyncData(null);
-  }
-}
-```
-
-### Usage
-
-```dart
-// Read state (re-renders on change)
-final authState = ref.watch(authProvider);   // AsyncValue<AuthToken?>
-
-// Call an action (inside a callback, not build())
-ref.read(authProvider.notifier).signIn();
-
-// React to state changes (navigation, snackbars)
-ref.listen(authProvider, (previous, next) {
-  next.whenOrNull(data: (token) { /* navigate */ });
-});
-
-// Optimise rebuilds — only rebuild when isLoading changes
-final isLoading = ref.watch(authProvider.select((s) => s.isLoading));
-```
-
-### Existing `@riverpod` providers
-
-| Provider | File | State type |
-|----------|------|-----------|
-| `authProvider` | `lib/features/auth/presentation/providers/auth_provider.dart` | `AsyncValue<AuthToken?>` |
-| `navigationProvider` | `lib/features/navigation/presentation/navigation_provider.dart` | `int` (tab index) |
-| `appThemeProvider` | `lib/core/theme/app_theme.dart` | `ThemeData` |
-| `stravaConnectionProvider` | `lib/features/connect_apps/providers/strava_connection_provider.dart` | `StravaConnectionStatus` (enum: disconnected/connecting/connected) — OAuth stubbed |
-
----
-
-## Pattern 2 — `FutureProvider` (read-only async data)
-
-Use for: API calls, data fetching. No code generation needed.
-
-### Declaration
-
-```dart
-// lib/features/my_garden/bloc/personal_plans_provider.dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final personalPlansProvider = FutureProvider<List<PersonalPlan>>((ref) async {
-  final dio = ref.watch(apiClientProvider);   // re-fetches if Dio changes
-  final response = await dio.get('/v1/members/me/personal-plans');
-  return (response.data as List)
-      .map((e) => PersonalPlan.fromJson(e as Map<String, dynamic>))
-      .toList();
-});
-```
-
-### Usage
-
-```dart
-final plansAsync = ref.watch(personalPlansProvider);
-
-plansAsync.when(
-  loading: () => const CircularProgressIndicator(),
-  error: (error, _) => Text(error.toString()),
-  data: (plans) => ListView.builder(...),
-);
-
-// Force re-fetch (e.g. pull-to-refresh, retry button)
-ref.invalidate(personalPlansProvider);
-```
-
-### Existing `FutureProvider` providers
-
-| Provider | File | Fetches |
-|----------|------|---------|
-| `personalPlansProvider` | `lib/features/my_garden/bloc/personal_plans_provider.dart` | `GET /v1/members/me/personal-plans` |
-| `localStoreProvider` | `lib/core/storage/local_store.dart` | `SharedPreferences.getInstance()` — async init, returns `LocalStore` |
-| `apiClientProvider` | `lib/core/network/api_client.dart` | `Provider<Dio>` (not async, but plain Provider — same pattern) |
-| `appRouterProvider` | `lib/core/router/app_router.dart` | `Provider<GoRouter>` — reads `authProvider` for redirect guard |
-
-### Using `localStoreProvider`
-
-```dart
-// Read (async — must handle loading/error)
-final storeAsync = ref.watch(localStoreProvider);
-final store = storeAsync.valueOrNull;
-
-// Or inside a FutureProvider / notifier build()
-final store = await ref.watch(localStoreProvider.future);
-await store.set('last_sync', DateTime.now().toIso8601String());
-final value = store.get<String>('last_sync');
-await store.remove('last_sync');
-```
-
-Supported types: `String`, `int`, `double`, `bool`, `List<String>`.
-
----
-
-## ref cheat sheet
-
-| Method | Where to use | Effect |
-|--------|-------------|--------|
-| `ref.watch(p)` | Inside `build()` | Subscribe — widget rebuilds when `p` changes |
-| `ref.read(p)` | Inside callbacks, interceptors | One-time read — no subscription |
-| `ref.listen(p, cb)` | Inside `build()` | Run `cb` on every change (side effects) |
-| `ref.invalidate(p)` | Anywhere | Discard cached value, force re-run on next watch |
-
----
-
-## Generated files
-
-Files ending in `.g.dart` are auto-generated by `build_runner`. They contain the actual `Provider` objects that Riverpod uses at runtime.
-
-- **Never edit `.g.dart` files** — they are overwritten on every build
-- **Add to `.gitignore`?** — No. This project commits them so the repo is buildable without running build_runner
-- **When to regenerate:** any time you add/remove/rename a `@riverpod` class or add a new `part '*.g.dart'` directive
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
+Use fresh, disposed ProviderContainers/ProviderScopes per test. Override providers
+for isolated rendering tests; future feature tests should preserve the feature's
+real state/repository path and replace external boundaries.
+See [testing](testing.md) and [Riverpod testing guidance](https://riverpod.dev/docs/how_to/testing).

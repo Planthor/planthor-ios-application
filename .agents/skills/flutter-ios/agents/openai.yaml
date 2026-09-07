@@ -1,0 +1,6 @@
+interface:
+  display_name: "Flutter iOS"
+  short_description: "Apple interaction and native validation"
+  default_prompt: "Use $flutter-ios to complete this Planthor mobile task."
+policy:
+  allow_implicit_invocation: true

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:planthor_ios_application/features/plans/bloc/sport_types_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/sport_types_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/sport_type.dart';
-import 'package:planthor_ios_application/features/plans/presentation/plan_form_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/screens/plan_form_screen.dart';
 
 const _plan = PersonalPlan(
   id: '1',

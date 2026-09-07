@@ -7,9 +7,9 @@ import 'package:planthor_ios_application/core/network/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
-import 'package:planthor_ios_application/features/plans/presentation/plans_screen.dart';
+import 'package:planthor_ios_application/features/plans/presentation/screens/plans_screen.dart';
 
 class _MockAdapter implements HttpClientAdapter {
   @override
