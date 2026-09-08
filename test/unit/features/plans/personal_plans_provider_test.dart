@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
 
 void main() {
   group('parsePersonalPlansResponse', () {

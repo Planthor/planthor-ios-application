@@ -5,9 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planthor_ios_application/core/layout/app_spacing.dart';
 import 'package:planthor_ios_application/core/theme/app_colors.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
-import 'package:planthor_ios_application/features/plans/data/plan_repository.dart';
-import 'package:planthor_ios_application/features/plans/bloc/sport_types_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/data/repositories/plan_repository.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/sport_types_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 
 class PlanFormScreen extends ConsumerStatefulWidget {

@@ -43,53 +43,28 @@ The token is injected automatically by `apiClientProvider` (`lib/core/network/ap
 
 ---
 
-## Flutter Integration
+## Flutter integration
 
-### Current wired calls
+The existing plans queries live in `lib/features/plans/presentation/providers/`:
 
-| Provider | Endpoint | File |
-|----------|----------|------|
-| `personalPlansProvider` | `GET /v1/members/me/personal-plans` | `lib/features/my_garden/bloc/personal_plans_provider.dart` |
+| Provider / repository | Endpoint |
+| --- | --- |
+| `personalPlansProvider` | `GET /v1/members/me/personal-plans` |
+| `activityLogsProvider(planId)` | `GET /v1/plans/{planId}/activity-logs` |
+| `sportTypesProvider` | `GET /v1/sport-types` |
+| `PlanRepository` | POST/PUT/DELETE personal-plan mutations |
 
-> **Note:** `PlansScreen` (`lib/features/plans/`) currently renders 5 hardcoded demo `PersonalPlan` objects. No live API call is made from that screen yet — real integration pending.
+`PlansScreen` watches the live plans provider. Its parser accepts both a legacy
+list and a paginated object containing `items`. The mutation repository lives in
+`lib/features/plans/data/repositories/plan_repository.dart`. These locations changed;
+request behavior and payloads did not.
 
-### Adding a new call
+`PersonalPlan` lives in `lib/features/plans/domain/entities/personal_plan.dart`.
+Its existing parser maps `planId`, `planName`, `target`, `currentValue`, dates, and
+status. It currently also contains presentation concerns. See
+[architecture](architecture.md) for these preserved exceptions.
 
-1. Add a `FutureProvider` in the relevant feature's `bloc/` folder:
-
-```dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:planthor_ios_application/core/network/api_client.dart';
-import 'package:planthor_ios_application/features/<name>/domain/entities/<model>.dart';
-
-final myProvider = FutureProvider<List<MyModel>>((ref) async {
-  final dio = ref.watch(apiClientProvider);
-  final response = await dio.get('/v1/path');
-  return (response.data as List)
-      .map((e) => MyModel.fromJson(e as Map<String, dynamic>))
-      .toList();
-});
-```
-
-2. The Bearer token is injected automatically — no extra setup needed.
-
-3. In the screen widget:
-
-```dart
-final dataAsync = ref.watch(myProvider);
-dataAsync.when(
-  loading: () => const CircularProgressIndicator(),
-  error: (e, _) => Text(e.toString()),
-  data: (items) => ListView(...),
-);
-```
-
-4. To retry after error: `ref.invalidate(myProvider)`.
-
-### Data models
-
-| Model | File | Maps to |
-|-------|------|---------|
-| `PersonalPlan` | `lib/features/my_garden/domain/entities/personal_plan.dart` | `PersonalPlanDto` — fields: `id` (String), `name` (String) |
-
-New models go in `lib/features/<name>/domain/entities/`. Add a `fromJson` factory. No code generation needed for plain data classes.
+For new or deliberately migrated calls, keep HTTP and wire decoding in data,
+expose a repository contract, and let a provider coordinate screen state. Existing
+query providers still call Dio directly; do not copy that coupling as the target
+architecture or refactor it during a folder-only task.

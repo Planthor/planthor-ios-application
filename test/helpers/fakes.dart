@@ -5,7 +5,7 @@ import 'package:planthor_ios_application/features/auth/domain/entities/auth_toke
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
-import 'package:planthor_ios_application/features/plans/bloc/personal_plans_provider.dart';
+import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
 
 String makeJwt({
