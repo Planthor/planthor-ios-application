@@ -67,7 +67,7 @@ Feature folders may contain:
 - `domain/`: entities and repository contracts. Keep this layer independent of Flutter, Dio, and storage where possible.
 - `data/`: API, OAuth, secure-storage data sources and repository implementations.
 - `presentation/`: screens, reusable feature widgets, and Riverpod providers.
-- `bloc/`: existing plain `FutureProvider` declarations; retain this convention where it is already used.
+- `presentation/providers/`: both plain and generated Riverpod providers. Plans has been organized this way; see [architecture](architecture.md) for current legacy boundaries and [testing](testing.md) for test placement.
 
 Platform integration lives in `ios/` and `android/`. Application images belong in `assets/images/` and must be registered in `pubspec.yaml`.
 
