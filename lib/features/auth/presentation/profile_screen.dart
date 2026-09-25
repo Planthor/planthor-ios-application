@@ -101,6 +101,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   value: _notificationsEnabled,
                   onChanged: (v) => setState(() => _notificationsEnabled = v),
                 ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final memberAsync = ref.watch(memberProfileProvider);
+                    final autoLink =
+                        memberAsync
+                            .valueOrNull
+                            ?.autoLinkPlansAndActivityApplications ??
+                        false;
+
+                    return _ToggleRow(
+                      icon: Icons.sync,
+                      title: 'Auto Link Plans and Activity Applications',
+                      subtitle: 'Automatically link external activities',
+                      value: autoLink,
+                      onChanged: (v) {
+                        ref
+                            .read(memberProfileProvider.notifier)
+                            .updateAutoLink(v);
+                      },
+                    );
+                  },
+                ),
                 _SettingsRowNav(
                   icon: Icons.shield_outlined,
                   title: 'Privacy & Security',
@@ -133,7 +155,7 @@ class _ProfileHeader extends ConsumerWidget {
     final memberAsync = ref.watch(memberProfileProvider);
     final member = memberAsync.valueOrNull;
 
-    // Fallback to JWT claims when member UUID not yet stored
+    // Fall back to JWT claims when the member profile is unavailable.
     final String displayName;
     final String avatarUrl;
     if (member != null) {

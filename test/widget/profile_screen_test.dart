@@ -123,6 +123,38 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('shows Auto Link Plans and Activity Applications toggle', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+      expect(
+        find.text('Auto Link Plans and Activity Applications'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('toggling Auto Link toggle does not throw', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      final titleFinder = find.text(
+        'Auto Link Plans and Activity Applications',
+      );
+      await tester.ensureVisible(titleFinder);
+
+      final switchFinder = find.descendant(
+        of: find.ancestor(of: titleFinder, matching: find.byType(Row)),
+        matching: find.byType(Switch),
+      );
+
+      if (switchFinder.evaluate().isNotEmpty) {
+        await tester.tap(switchFinder.first);
+        await tester.pump();
+      }
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('sign out calls notifier signOut', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();

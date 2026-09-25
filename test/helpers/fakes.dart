@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:planthor_ios_application/features/auth/domain/entities/auth_token.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/auth_provider.dart';
 import 'package:planthor_ios_application/features/auth/presentation/providers/member_profile_provider.dart';
+import 'package:planthor_ios_application/features/auth/domain/entities/member.dart';
 import 'package:planthor_ios_application/features/navigation/presentation/navigation_provider.dart';
 import 'package:planthor_ios_application/features/plans/presentation/providers/personal_plans_provider.dart';
 import 'package:planthor_ios_application/features/plans/domain/entities/personal_plan.dart';
@@ -78,16 +79,24 @@ class FakeNavigation extends Navigation {
   int build() => 0;
 }
 
+class FakeMemberProfile extends MemberProfileNotifier {
+  @override
+  Future<Member?> build() async => null;
+
+  @override
+  Future<void> updateAutoLink(bool value) async {}
+}
+
 List<Override> authOverrides({AuthToken? token}) => [
   authProvider.overrideWith(() => FakeAuth(token)),
-  memberProfileProvider.overrideWith((ref) async => null),
+  memberProfileProvider.overrideWith(FakeMemberProfile.new),
   navigationProvider.overrideWith(FakeNavigation.new),
   personalPlansProvider.overrideWith((ref) async => <PersonalPlan>[]),
 ];
 
 List<Override> unauthOverrides() => [
   authProvider.overrideWith(FakeAuthNull.new),
-  memberProfileProvider.overrideWith((ref) async => null),
+  memberProfileProvider.overrideWith(FakeMemberProfile.new),
   navigationProvider.overrideWith(FakeNavigation.new),
   personalPlansProvider.overrideWith((ref) async => <PersonalPlan>[]),
 ];
